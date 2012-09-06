@@ -39,6 +39,13 @@ g/xsd/maven-4.0.0.xsd">
           <target>${java.version}</target>
         </configuration>
       </plugin>
+      <plugin>            
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-war-plugin</artifactId>
+        <configuration>
+          <webXml>src\main\webapp\WEB-INF\web.xml</webXml>        
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 
