@@ -9,7 +9,9 @@
   <packaging>pom</packaging>
 
   <modules>
+    <module>common</module>
     <module>filecache</module>
+    <module>identity</module>
   </modules>
 
   <distributionManagement>

@@ -9,9 +9,9 @@ g/xsd/maven-4.0.0.xsd">
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>hoccer-service-filecache</artifactId>
+  <artifactId>hoccer-service-identity</artifactId>
 
-  <name>Hoccer Filecache Service</name>
+  <name>Hoccer Identity Service</name>
 
   <packaging>war</packaging>
 
@@ -22,14 +22,9 @@ g/xsd/maven-4.0.0.xsd">
 
   <dependencies>
     <dependency>
-        <groupId>hoccer</groupId>
-        <artifactId>hoccer-service-common</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-        <groupId>javax.servlet</groupId>
-        <artifactId>javax.servlet-api</artifactId>
-        <version>3.0.1</version>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>3.0.1</version>
     </dependency>
   </dependencies>
   
