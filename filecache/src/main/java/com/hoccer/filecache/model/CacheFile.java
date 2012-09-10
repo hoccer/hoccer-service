@@ -53,6 +53,26 @@ public class CacheFile {
 		mLimit = 0;
 		mUUID = pUUID;
 	}
+
+	public String getStateString() {
+		return stateNames[mState];
+	}
+	
+	public int getLimit() {
+		return mLimit;
+	}
+	
+	public String getUUID() {
+		return mUUID;
+	}
+	
+	public CacheUpload getUpload() {
+		return mUpload;
+	}
+	
+	public Vector<CacheDownload> getDownloads() {
+		return new Vector<CacheDownload>(mDownloads);
+	}
 	
 	private void switchState(int newState, String cause) {
 		log.info("file " + mUUID + " state " + stateNames[mState]
@@ -130,10 +150,6 @@ public class CacheFile {
 		mDownloads.remove(download);
 	}
 	
-	public int getLimit() {
-		return mLimit;
-	}
-	
 	public void updateLimit(int newLimit) {
 		mStateLock.lock();
 		try {			
@@ -169,12 +185,10 @@ public class CacheFile {
 			}
 			
 			// wait for state change
-			//log.info("DL enter wait in state " + stateNames[mState] + " limit old " + lastLimit + " new " + mLimit);
 			try {
 				mStateChanged.await();
 			} catch (InterruptedException e) {
 			}
-			//log.info("DL leave wait in state " + stateNames[mState] + " limit old " + lastLimit + " new " + mLimit);
 
 			// cases where progress may have
 			// been made while waiting
@@ -240,6 +254,10 @@ public class CacheFile {
 				return res;
 			}
 		}
+	}
+	
+	public static Vector<CacheFile> getAll() {
+		return new Vector<CacheFile>(sFiles.values());
 	}
 	
 }

@@ -9,6 +9,11 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.hoccer.filecache.model.CacheFile;
 
+/**
+ * Active upload to the cache
+ * 
+ * @author ingo
+ */
 public class CacheUpload extends CacheTransfer {
 	
 	public CacheUpload(CacheFile file,
@@ -21,6 +26,7 @@ public class CacheUpload extends CacheTransfer {
 		byte[] buffer = new byte[64*1024];
 		
 		cacheFile.uploadStarts(this);
+		rateStart();
 		
 		try {
 			InputStream inStream = httpRequest.getInputStream();
@@ -41,6 +47,8 @@ public class CacheUpload extends CacheTransfer {
 				outFile.write(buffer, 0, bytesRead);
 				
 				bytesTotal += bytesRead;
+				
+				rateProgress(bytesRead);
 				
 				cacheFile.updateLimit(bytesTotal);
 			} while(true);

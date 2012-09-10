@@ -9,6 +9,11 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.hoccer.filecache.model.CacheFile;
 
+/**
+ * Active download from the cache
+ * 
+ * @author ingo
+ */
 public class CacheDownload extends CacheTransfer {
 
 	OutputStream outStream;
@@ -24,6 +29,7 @@ public class CacheDownload extends CacheTransfer {
 		byte[] buffer = new byte[64*1024];
 		
 		cacheFile.downloadStarts(this);
+		rateStart();
 		
 		try {
 			OutputStream outStream = httpResponse.getOutputStream();
@@ -57,6 +63,8 @@ public class CacheDownload extends CacheTransfer {
 					
 					bytesSent += bytesRead;
 					bytesToTransfer -= bytesRead;
+					
+					rateProgress(bytesRead);
 				} while(bytesToTransfer > 0);
 			} while(true);
 			
