@@ -23,7 +23,7 @@ public class CacheServlet extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		log.info("GET " + req.getPathInfo());
+		log.info("download starts: " + req.getPathInfo());
 		
 		CacheFile file = CacheFile.forPathInfo(req.getPathInfo());
 		if(file == null) {
@@ -35,12 +35,14 @@ public class CacheServlet extends HttpServlet {
 		CacheDownload download = new CacheDownload(file, req, resp);
 		
 		download.perform();
+		
+		log.info("download finished: " + req.getPathInfo());
 	}
 
 	@Override
 	protected void doPut(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		log.info("PUT " + req.getPathInfo());
+		log.info("upload starts: " + req.getPathInfo());
 		
 		CacheFile file = CacheFile.forPathInfo(req.getPathInfo());
 		if(file == null) {
@@ -52,6 +54,8 @@ public class CacheServlet extends HttpServlet {
 		CacheUpload upload = new CacheUpload(file, req, resp);
 		
 		upload.perform();
+		
+		log.info("upload finished: " + req.getPathInfo());
 	}
 
 }
