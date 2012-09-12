@@ -4,8 +4,15 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.text.DateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Vector;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Logger;
@@ -20,6 +27,7 @@ public class CacheFile {
 	public static final int STATE_UPLOADING = 3;
 	public static final int STATE_COMPLETE = 4;
 	public static final int STATE_ABANDONED = 5;
+	public static final int STATE_EXPIRED = 6;
 	
 	private static String[] stateNames = {
 		"UNKNOWN",
@@ -28,7 +36,11 @@ public class CacheFile {
 		"UPLOADING",
 		"COMPLETE",
 		"ABANDONED",
+		"EXPIRED"
 	};
+	
+	private static ScheduledExecutorService expiryExecutor
+		= Executors.newSingleThreadScheduledExecutor();
 			
 	protected static Logger log
 		= Logger.getLogger(CacheFile.class.getSimpleName());
@@ -39,6 +51,8 @@ public class CacheFile {
 	private int mLimit;
 	
 	private String mUUID;
+	
+	private Date mExpiryTime;
 	
 	private CacheUpload mUpload = null;
 	
@@ -51,6 +65,7 @@ public class CacheFile {
 		
 		mState = STATE_NEW;
 		mLimit = 0;
+		
 		mUUID = pUUID;
 	}
 
@@ -66,6 +81,10 @@ public class CacheFile {
 		return mUUID;
 	}
 	
+	public Date getExpiryTime() {
+		return mExpiryTime;
+	}
+	
 	public CacheUpload getUpload() {
 		return mUpload;
 	}
@@ -74,10 +93,65 @@ public class CacheFile {
 		return new Vector<CacheDownload>(mDownloads);
 	}
 	
+	private String getPath() {
+		return "/tmp/" + mUUID;
+	}
+	
+	private File getFile() {
+		return new File(getPath());
+	}
+	
 	private void switchState(int newState, String cause) {
 		log.info("file " + mUUID + " state " + stateNames[mState]
 					+ " -> " + stateNames[newState] + ": " + cause);
 		mState = newState;
+	}
+	
+	private void considerRemoval() {
+		if(mState == STATE_EXPIRED) {
+			if(mDownloads.size() == 0) {
+				CacheFile.remove(this);
+			}
+		}
+		if(mState == STATE_ABANDONED) {
+			if(mDownloads.size() == 0) {
+				CacheFile.remove(this);
+			}
+		}
+	}
+	
+	
+	public void setupExpiry(int secondsFromNow) {
+		Date now = new Date();
+		Calendar cal = new GregorianCalendar();
+		cal.setTime(now);
+		cal.add(Calendar.SECOND, secondsFromNow);
+		mExpiryTime = cal.getTime();
+		log.info("file " + mUUID + " expires " + mExpiryTime.toString());
+	}
+	
+	private void scheduleExpiry() {
+		Runnable expiryAction = new Runnable() {
+			@Override
+			public void run() {
+				CacheFile.this.expire();
+			}
+		};
+		expiryExecutor.schedule(
+				expiryAction,
+				mExpiryTime.getTime() - System.currentTimeMillis(),
+				TimeUnit.MILLISECONDS);
+	}
+	
+	private void expire() {
+		mStateLock.lock();
+		try {
+			switchState(STATE_EXPIRED, "expiry time reached");
+			this.getFile().delete();
+			considerRemoval();
+		} finally {
+			mStateLock.unlock();
+		}
 	}
 	
 	public void uploadStarts(CacheUpload upload) {
@@ -105,6 +179,8 @@ public class CacheFile {
 			mUpload = null;
 			
 			mStateChanged.signalAll();
+			
+			considerRemoval();
 		} finally {
 			mStateLock.unlock();
 		}
@@ -119,9 +195,13 @@ public class CacheFile {
 				// XXX error
 			}
 			
+			scheduleExpiry();
+			
 			mUpload = null;
 			
 			mStateChanged.signalAll();
+			
+			considerRemoval();
 		} finally {
 			mStateLock.unlock();
 		}
@@ -144,10 +224,12 @@ public class CacheFile {
 	
 	public void downloadAborted(CacheDownload download) {
 		mDownloads.remove(download);
+		considerRemoval();
 	}
 	
 	public void downloadFinished(CacheDownload download) {
 		mDownloads.remove(download);
+		considerRemoval();
 	}
 	
 	public void updateLimit(int newLimit) {
@@ -212,10 +294,6 @@ public class CacheFile {
 		}
 	}
 	
-	private String getPath() {
-		return "/tmp/" + mUUID;
-	}
-	
 	private void ensureExists() throws IOException {
 		File f = new File(getPath());
 		f.createNewFile();
@@ -253,6 +331,12 @@ public class CacheFile {
 				sFiles.put(rest, res);
 				return res;
 			}
+		}
+	}
+	
+	public static void remove(CacheFile f) {
+		if(sFiles.containsKey(f.getUUID())) {
+			sFiles.remove(f.getUUID());
 		}
 	}
 	
