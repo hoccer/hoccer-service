@@ -68,6 +68,10 @@ public class CacheFile {
 		
 		mUUID = pUUID;
 	}
+	
+	public int getState() {
+		return mState;
+	}
 
 	public String getStateString() {
 		return stateNames[mState];

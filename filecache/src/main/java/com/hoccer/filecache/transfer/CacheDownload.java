@@ -28,6 +28,13 @@ public class CacheDownload extends CacheTransfer {
 	public void perform() throws IOException {
 		byte[] buffer = new byte[64*1024];
 		
+		int fileState = cacheFile.getState();
+		if(fileState == CacheFile.STATE_EXPIRED
+			|| fileState == CacheFile.STATE_ABANDONED) {
+			httpResponse.sendError(httpResponse.SC_NOT_FOUND);
+			return;
+		}
+		
 		cacheFile.downloadStarts(this);
 		rateStart();
 		
@@ -56,7 +63,7 @@ public class CacheDownload extends CacheTransfer {
 					int bytesRead = inFile.read(buffer, 0, currentBunch);
 					
 					if(bytesRead == -1) {
-						// XXX throw. should never happen.
+						throw new IOException("Synchronization fault");
 					}
 					
 					outStream.write(buffer, 0, bytesRead);
