@@ -250,7 +250,7 @@ public class CacheFile {
 		try {
 			// cases where progress has been
 			// made already or will never be made
-			if(mState == STATE_COMPLETE) {
+			if(mState == STATE_COMPLETE || mState == STATE_EXPIRED) {
 				if(mLimit > lastLimit) {
 					return true;
 				} else {
