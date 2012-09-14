@@ -31,11 +31,15 @@ public class StatusServlet extends HttpServlet {
 		
 		Vector<CacheFile> allFiles = CacheFile.getAll();
 		w.write("Active files (" + allFiles.size() + "):\n");
-		for (CacheFile f : allFiles) {
+		for (CacheFile f : allFiles) {			
 			w.write(" File " + f.getUUID()
-					+ " state " + f.getStateString()
+					+ " type " + f.getContentType()
+					+ "\n");
+			
+			w.write("  State " + f.getStateString()
 					+ " limit " + f.getLimit()
 					+ "\n");
+			w.write("  Expires " + f.getExpiryTime() + "\n");
 			
 			CacheUpload upload = f.getUpload();
 			if(upload != null) {
