@@ -51,6 +51,8 @@ public abstract class CacheTransfer {
 	private long rateAccumulator;
 	private double lastRate;
 	
+	private long totalBytesTransfered;
+	
 	/**
 	 * Primary constructor
 	 * 
@@ -69,6 +71,10 @@ public abstract class CacheTransfer {
 		return httpRequest.getRemoteAddr();
 	}
 	
+	public long getBytesTransfered() {
+		return totalBytesTransfered;
+	}
+	
 	public double getRate() {
 		return lastRate;
 	}
@@ -76,11 +82,14 @@ public abstract class CacheTransfer {
 	protected void rateStart() {
 		rateTimestamp = System.currentTimeMillis();
 		lastRate = 0.0;
+		totalBytesTransfered = 0;
 	}
 	
 	protected void rateProgress(int bytesTransfered) {
 		long now = System.currentTimeMillis();
 		long passed = now - rateTimestamp;
+		
+		totalBytesTransfered += bytesTransfered;
 		
 		rateAccumulator += bytesTransfered;
 		

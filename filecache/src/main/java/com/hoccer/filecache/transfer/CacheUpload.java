@@ -41,6 +41,12 @@ public class CacheUpload extends CacheTransfer {
 		}
 		cacheFile.setupExpiry(expiresIn);
 		
+		String cType = httpRequest.getContentType();
+		if(cType == null) {
+			cType = "application/octet-stream";
+		}
+		cacheFile.setContentType(cType);
+		
 		cacheFile.uploadStarts(this);
 		rateStart();
 		

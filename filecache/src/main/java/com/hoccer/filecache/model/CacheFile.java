@@ -51,6 +51,7 @@ public class CacheFile {
 	private int mLimit;
 	
 	private String mUUID;
+	private String mContentType;
 	
 	private Date mExpiryTime;
 	
@@ -83,6 +84,14 @@ public class CacheFile {
 	
 	public String getUUID() {
 		return mUUID;
+	}
+	
+	public String getContentType() {
+		return mContentType;
+	}
+	
+	public void setContentType(String contentType) {
+		mContentType = contentType;
 	}
 	
 	public Date getExpiryTime() {

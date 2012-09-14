@@ -35,6 +35,8 @@ public class CacheDownload extends CacheTransfer {
 			return;
 		}
 		
+		httpResponse.setContentType(cacheFile.getContentType());
+		
 		cacheFile.downloadStarts(this);
 		rateStart();
 		
