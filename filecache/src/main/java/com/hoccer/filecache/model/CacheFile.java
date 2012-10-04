@@ -106,12 +106,8 @@ public class CacheFile {
 		return new Vector<CacheDownload>(mDownloads);
 	}
 	
-	private String getPath() {
-		return "/tmp/" + mUUID;
-	}
-	
 	private File getFile() {
-		return new File(getPath());
+		return new File(sDataDirectory, mUUID);
 	}
 	
 	private void switchState(int newState, String cause) {
@@ -301,7 +297,7 @@ public class CacheFile {
 	}
 	
 	private void ensureExists() throws IOException {
-		File f = new File(getPath());
+		File f = getFile();
 		f.createNewFile();
 	}
 	
@@ -311,7 +307,7 @@ public class CacheFile {
 		RandomAccessFile r = null;
 		
 		try {
-			r = new RandomAccessFile(new File(getPath()), mode);
+			r = new RandomAccessFile(getFile(), mode);
 		} catch (FileNotFoundException e) {
 			// XXX does not happen
 		}
@@ -319,8 +315,14 @@ public class CacheFile {
 		return r;
 	}
 
+	private static File sDataDirectory = null;
+	
 	private static HashMap<String, CacheFile> sFiles
 			= new HashMap<String, CacheFile>();
+	
+	public static void setDataDirectory(File directory) {
+		sDataDirectory = directory;
+	}
 	
 	public static CacheFile forPathInfo(String pathInfo, boolean create) {
 		if(pathInfo.length() == 1) {
