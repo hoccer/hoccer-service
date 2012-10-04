@@ -25,10 +25,19 @@ public class CacheServlet extends HttpServlet {
 			throws ServletException, IOException {
 		log.info("download starts: " + req.getPathInfo());
 		
-		CacheFile file = CacheFile.forPathInfo(req.getPathInfo());
+		CacheFile file = CacheFile.forPathInfo(req.getPathInfo(), false);
 		if(file == null) {
 			resp.sendError(HttpServletResponse.SC_NOT_FOUND,
-							"File can't exist in cache");
+					"File does not exist");
+			return;
+		}
+		
+		int fileState = file.getState();
+		if(fileState == CacheFile.STATE_EXPIRED
+			|| fileState == CacheFile.STATE_ABANDONED
+			|| fileState == CacheFile.STATE_NEW) {
+			resp.sendError(HttpServletResponse.SC_NOT_FOUND,
+					"File does not exist");
 			return;
 		}
 		
@@ -44,10 +53,10 @@ public class CacheServlet extends HttpServlet {
 			throws ServletException, IOException {
 		log.info("upload starts: " + req.getPathInfo());
 		
-		CacheFile file = CacheFile.forPathInfo(req.getPathInfo());
+		CacheFile file = CacheFile.forPathInfo(req.getPathInfo(), true);
 		if(file == null) {
 			resp.sendError(HttpServletResponse.SC_NOT_FOUND,
-							"File can't exist in cache");
+					"File can not exist in cache");
 			return;
 		}
 		

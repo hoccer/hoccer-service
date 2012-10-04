@@ -28,13 +28,6 @@ public class CacheDownload extends CacheTransfer {
 	public void perform() throws IOException {
 		byte[] buffer = new byte[64*1024];
 		
-		int fileState = cacheFile.getState();
-		if(fileState == CacheFile.STATE_EXPIRED
-			|| fileState == CacheFile.STATE_ABANDONED) {
-			httpResponse.sendError(httpResponse.SC_NOT_FOUND);
-			return;
-		}
-		
 		httpResponse.setContentType(cacheFile.getContentType());
 		
 		cacheFile.downloadStarts(this);

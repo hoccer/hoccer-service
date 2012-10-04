@@ -23,7 +23,7 @@ import com.hoccer.filecache.transfer.CacheUpload;
 public class CacheFile {
 
 	public static final int STATE_NEW = 1;
-	public static final int STATE_WAITING = 2;
+	//public static final int STATE_WAITING = 2;
 	public static final int STATE_UPLOADING = 3;
 	public static final int STATE_COMPLETE = 4;
 	public static final int STATE_ABANDONED = 5;
@@ -170,7 +170,7 @@ public class CacheFile {
 	public void uploadStarts(CacheUpload upload) {
 		mStateLock.lock();
 		try {
-			if(mState == STATE_NEW || mState == STATE_WAITING) {
+			if(mState == STATE_NEW) {
 				switchState(STATE_UPLOADING, "new upload");
 			} else {
 				// XXX error or reupload
@@ -223,10 +223,6 @@ public class CacheFile {
 	public void downloadStarts(CacheDownload download) {
 		mStateLock.lock();
 		try {
-			if(mState == STATE_NEW) {
-				switchState(STATE_WAITING, "new download");
-			}
-			
 			mDownloads.add(download);
 			
 			mStateChanged.signalAll();
@@ -296,9 +292,6 @@ public class CacheFile {
 			if(mState == STATE_NEW) {
 				return true;
 			}
-			if(mState == STATE_WAITING) {
-				return true;
-			}
 			
 			// no progression possible
 			return false;
@@ -329,22 +322,27 @@ public class CacheFile {
 	private static HashMap<String, CacheFile> sFiles
 			= new HashMap<String, CacheFile>();
 	
-	public static CacheFile forPathInfo(String pathInfo) {
+	public static CacheFile forPathInfo(String pathInfo, boolean create) {
 		if(pathInfo.length() == 1) {
 			return null;
 		}
+		
+		CacheFile res = null;
 		
 		synchronized (sFiles) {
 			String rest = pathInfo.substring(1);
 			
 			if(sFiles.containsKey(rest)) {
-				return sFiles.get(rest);
+				res = sFiles.get(rest);
 			} else {
-				CacheFile res = new CacheFile(rest);
-				sFiles.put(rest, res);
-				return res;
+				if(create) {
+					res = new CacheFile(rest);
+					sFiles.put(rest, res);
+				}
 			}
 		}
+		
+		return res;
 	}
 	
 	public static void remove(CacheFile f) {
