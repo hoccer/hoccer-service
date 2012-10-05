@@ -16,6 +16,8 @@ import com.hoccer.filecache.model.CacheFile;
  */
 public class CacheUpload extends CacheTransfer {
 	
+	private static final int BUFFER_SIZE = 64 * 1024;
+	
 	public static final int MIN_LIFETIME = 10;
 	public static final int MAX_LIFETIME = 3 * 3600;
 	
@@ -26,7 +28,7 @@ public class CacheUpload extends CacheTransfer {
 	}
 	
 	public void perform() throws IOException {
-		byte[] buffer = new byte[64*1024];
+		byte[] buffer = new byte[BUFFER_SIZE];
 		
 		int expiresIn = MAX_LIFETIME;
 		String expiresString = httpRequest.getParameter("expires_in");

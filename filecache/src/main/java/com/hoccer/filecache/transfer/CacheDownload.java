@@ -16,6 +16,8 @@ import com.hoccer.filecache.model.CacheFile;
  */
 public class CacheDownload extends CacheTransfer {
 
+	private static final int BUFFER_SIZE = 64 * 1024;
+	
 	OutputStream outStream;
 	
 	public CacheDownload(CacheFile file,
@@ -26,7 +28,7 @@ public class CacheDownload extends CacheTransfer {
 	}
 	
 	public void perform() throws IOException {
-		byte[] buffer = new byte[64*1024];
+		byte[] buffer = new byte[BUFFER_SIZE];
 		
 		httpResponse.setContentType(cacheFile.getContentType());
 		
