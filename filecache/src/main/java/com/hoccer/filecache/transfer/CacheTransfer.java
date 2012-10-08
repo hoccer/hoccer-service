@@ -68,7 +68,12 @@ public abstract class CacheTransfer {
 	}
 	
 	public String getRemoteAddr() {
-		return httpRequest.getRemoteAddr();
+		String forwardedFor = httpRequest.getHeader("X-Forwarded-For");
+		if(forwardedFor == null) {
+			return httpRequest.getRemoteAddr();
+		} else {
+			return forwardedFor;
+		}
 	}
 	
 	public long getBytesTransfered() {
