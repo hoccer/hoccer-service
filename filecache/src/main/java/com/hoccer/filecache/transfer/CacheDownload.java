@@ -30,7 +30,14 @@ public class CacheDownload extends CacheTransfer {
 	public void perform() throws IOException {
 		byte[] buffer = new byte[BUFFER_SIZE];
 		
+		// set content type
 		httpResponse.setContentType(cacheFile.getContentType());
+		
+		// set content length, if known
+		int cLength = cacheFile.getContentLength();
+		if(cLength != -1) {
+			httpResponse.setContentLength(cLength);
+		}
 		
 		cacheFile.downloadStarts(this);
 		rateStart();
