@@ -17,8 +17,26 @@ public class ContextListener implements ServletContextListener {
 	@Override
 	public void contextInitialized(ServletContextEvent sce) {
 		ServletContext ctx = sce.getServletContext();
-		File tmpDir = (File)ctx.getAttribute(ServletContext.TEMPDIR);
-		CacheFile.setDataDirectory(tmpDir);
+		
+		File dataDirectory = null;
+		
+		// try to find data directory from configuration
+		String confDir = ctx.getInitParameter("hoccer.filecache.dataDirectory");
+		if(confDir != null) {
+			dataDirectory = new File(confDir);
+			if(!dataDirectory.isDirectory()) {
+				dataDirectory = null;
+			}
+		}
+		
+		// else, create and use a subdir of TEMPDIR
+		if(dataDirectory == null) {
+			File tmpDir = (File)ctx.getAttribute(ServletContext.TEMPDIR);
+			dataDirectory = new File(tmpDir, "data");
+			dataDirectory.mkdir();
+		}
+		
+		CacheFile.setDataDirectory(dataDirectory);
 	}
 
 	@Override
