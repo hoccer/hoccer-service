@@ -100,6 +100,10 @@ public class CacheFile {
 		return mUpload;
 	}
 	
+	public int getNumDownloads() {
+		return mDownloads.size();
+	}
+	
 	public Vector<CacheDownload> getDownloads() {
 		return new Vector<CacheDownload>(mDownloads);
 	}

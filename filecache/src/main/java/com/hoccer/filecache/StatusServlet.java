@@ -3,6 +3,8 @@ package com.hoccer.filecache;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Vector;
 
 import javax.servlet.ServletException;
@@ -30,6 +32,9 @@ public class StatusServlet extends HttpServlet {
 		w.write(">>>>>>>>>>>>>>> Hoccer Filecache <<<<<<<<<<<<<<<\n\n");
 		
 		Vector<CacheFile> allFiles = CacheFile.getAll();
+		
+		Collections.sort(allFiles, getSorting());
+		
 		w.write("Active files (" + allFiles.size() + "):\n");
 		for (CacheFile f : allFiles) {			
 			w.write(" File " + f.getUUID()
@@ -59,6 +64,33 @@ public class StatusServlet extends HttpServlet {
 		}
 		
 		w.close();
+	}
+	
+	private Comparator<CacheFile> getSorting() {
+		return new Comparator<CacheFile>() {
+			@Override
+			public int compare(CacheFile o1, CacheFile o2) {
+				int s1 = o1.getState();
+				int s2 = o2.getState();
+				
+				if(s1 < s2) {
+					return -1;
+				} else if(s1 > s2) {
+					return +1;
+				}
+				
+				int n1 = o1.getNumDownloads();
+				int n2 = o2.getNumDownloads();
+				
+				if(n1 < n2) {
+					return +1;
+				} else if (n1 > n2) {
+					return -1;
+				}
+				
+				return 0;
+			}
+		};
 	}
 
 }
