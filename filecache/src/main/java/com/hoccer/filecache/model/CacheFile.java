@@ -23,10 +23,10 @@ import com.hoccer.filecache.transfer.CacheUpload;
 public class CacheFile {
 
 	public static final int STATE_NEW = 1;
-	public static final int STATE_UPLOADING = 3;
-	public static final int STATE_COMPLETE = 4;
-	public static final int STATE_ABANDONED = 5;
-	public static final int STATE_EXPIRED = 6;
+	public static final int STATE_UPLOADING = 2;
+	public static final int STATE_COMPLETE = 3;
+	public static final int STATE_ABANDONED = 4;
+	public static final int STATE_EXPIRED = 5;
 	
 	private static String[] stateNames = {
 		"UNKNOWN",
