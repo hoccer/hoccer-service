@@ -71,15 +71,6 @@ public class StatusServlet extends HttpServlet {
 		return new Comparator<CacheFile>() {
 			@Override
 			public int compare(CacheFile o1, CacheFile o2) {
-				int s1 = o1.getState();
-				int s2 = o2.getState();
-				
-				if(s1 < s2) {
-					return -1;
-				} else if(s1 > s2) {
-					return +1;
-				}
-				
 				int n1 = o1.getNumDownloads();
 				int n2 = o2.getNumDownloads();
 				
@@ -87,6 +78,15 @@ public class StatusServlet extends HttpServlet {
 					return +1;
 				} else if (n1 > n2) {
 					return -1;
+				}
+				
+				int s1 = o1.getState();
+				int s2 = o2.getState();
+				
+				if(s1 < s2) {
+					return -1;
+				} else if(s1 > s2) {
+					return +1;
 				}
 				
 				return 0;
