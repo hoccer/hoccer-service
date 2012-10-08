@@ -47,11 +47,16 @@ public abstract class CacheTransfer {
 	 */
 	protected HttpServletResponse httpResponse;
 	
+	private long rateStartTime;
+	private long rateEndTime;
+	
 	private long rateTimestamp;
 	private long rateAccumulator;
 	private double lastRate;
 	
+	private long totalDuration;
 	private long totalBytesTransfered;
+	private double totalRate;
 	
 	/**
 	 * Primary constructor
@@ -84,8 +89,18 @@ public abstract class CacheTransfer {
 		return lastRate;
 	}
 	
+	public long getTotalDuration() {
+		return totalDuration;
+	}
+	
+	public double getTotalRate() {
+		return totalRate;
+	}
+	
 	protected void rateStart() {
-		rateTimestamp = System.currentTimeMillis();
+		long now = System.currentTimeMillis();
+		rateStartTime = now;
+		rateTimestamp = now;
 		lastRate = 0.0;
 		totalBytesTransfered = 0;
 	}
@@ -109,7 +124,10 @@ public abstract class CacheTransfer {
 	}
 	
 	protected void rateFinish() {
+		rateEndTime = System.currentTimeMillis();
 		
+		totalDuration = rateEndTime - rateStartTime;
+		totalRate = totalBytesTransfered / (totalDuration / 1000.0);
 	}
 	
 }
