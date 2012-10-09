@@ -52,6 +52,7 @@ public class StatusServlet extends HttpServlet {
 				w.write("  Upload"
 						+ " from " + upload.getRemoteAddr()
 						+ " rate " + Math.round(upload.getRate()) / 1000.0 + " kB/s"
+						+ " agent " + upload.getUserAgent()
 						+ "\n");
 			}
 			
@@ -60,6 +61,7 @@ public class StatusServlet extends HttpServlet {
 				w.write("  Download"
 						+ " from " + d.getRemoteAddr()
 						+ " rate " + Math.round(d.getRate()) / 1000.0 + " kB/s"
+						+ " agent " + d.getUserAgent()
 						+ "\n");
 			}
 		}

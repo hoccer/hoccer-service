@@ -81,6 +81,15 @@ public abstract class CacheTransfer {
 		}
 	}
 	
+	public String getUserAgent() {
+		String userAgent = httpRequest.getHeader("User-Agent");
+		if(userAgent == null) {
+			return "unknown";
+		} else {
+			return userAgent;
+		}
+	}
+	
 	public long getBytesTransfered() {
 		return totalBytesTransfered;
 	}
