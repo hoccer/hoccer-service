@@ -262,7 +262,14 @@ public class CacheFile {
 	}
 	
 	public boolean waitForData(int lastLimit) {
+		// back off for a moment to reduce lock contention
+		try {
+			Thread.sleep(100);
+		} catch (InterruptedException e) {
+			// we don't care
+		}
 		
+		// acquire state lock
 		mStateLock.lock();
 		
 		try {
@@ -305,8 +312,10 @@ public class CacheFile {
 			// no progression possible
 			return false;
 		} finally {
+			// release state lock
 			mStateLock.unlock();
 		}
+
 	}
 	
 	private void ensureExists() throws IOException {
