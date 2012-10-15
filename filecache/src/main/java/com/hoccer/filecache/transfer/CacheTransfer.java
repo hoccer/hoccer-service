@@ -122,7 +122,7 @@ public abstract class CacheTransfer {
 		
 		rateAccumulator += bytesTransfered;
 		
-		if(passed > 250) {
+		if(passed > 500) {
 			double rate = rateAccumulator / (passed / 1000.0);
 						
 			rateTimestamp = now;
