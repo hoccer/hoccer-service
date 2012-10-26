@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module rename-to='Index'>
+  <inherits name='com.google.gwt.user.User' />
+
+  <inherits name="com.google.gwt.logging.Logging"/>
+  <set-property name="gwt.logging.logLevel" 
+    value="INFO" />          
+  <set-property name="gwt.logging.enabled" 
+    value="TRUE" /> 
+  <set-property name="gwt.logging.developmentModeHandler" 
+    value="ENABLED" />  
+  <set-property name="gwt.logging.systemHandler" 
+    value="DISABLED" />
+  <set-property name="gwt.logging.popupHandler" 
+    value="DISABLED" />
+  <set-property name="gwt.logging.consoleHandler" 
+    value="ENABLED"/> 
+  <set-property name="gwt.logging.firebugHandler" 
+    value="ENABLED" />
+
+  <inherits name='com.google.gwt.junit.JUnit' />
+
+  <inherits name='com.google.gwt.user.theme.standard.Standard' />
+  <!-- <inherits name='com.google.gwt.user.theme.chrome.Chrome'/> -->
+  <!-- <inherits name='com.google.gwt.user.theme.dark.Dark'/>     -->
+
+  <entry-point class='com.hoccer.account.client.Index' />
+
+  <!-- Specify the paths for translatable code                    -->
+  <source path='client' />
+  <source path='shared' />
+
+</module>
