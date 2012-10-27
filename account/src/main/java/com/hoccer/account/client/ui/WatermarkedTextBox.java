@@ -1,4 +1,4 @@
-package com.hoccer.account.client;
+package com.hoccer.account.client.ui;
 
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;

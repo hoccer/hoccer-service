@@ -17,13 +17,15 @@ import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.hoccer.account.client.ui.MainPanel;
 
 /**
  */
-public class Index implements EntryPoint {
-	public static final String HISTORY_LOGIN = "accountLogin";
-	public static final String HISTORY_WELCOME = "accountWelcome";
-	public static final String HISTORY_DEVICES = "accountDevices";
+public class AccountManager implements EntryPoint {
+	public static final String SCREEN_LOGIN = "accountLogin";
+	public static final String SCREEN_REGISTRATION = "accountRegister";
+	public static final String SCREEN_WELCOME = "accountWelcome";
+	public static final String SCREEN_DEVICES = "accountDevices";
 
 	/**
 	 * The message displayed to the user when the server cannot be reached or
@@ -34,7 +36,7 @@ public class Index implements EntryPoint {
 			+ "connection and try again.";
 
 	private static final Logger LOG
-		= Logger.getLogger(Index.class.getName());
+		= Logger.getLogger(AccountManager.class.getName());
 	
 	private final AccountServiceAsync mService
 		= GWT.create(AccountService.class);
@@ -42,7 +44,7 @@ public class Index implements EntryPoint {
 	private final Messages mMessages
 		= GWT.create(Messages.class);
 	
-	private IndexPage mPage;
+	private MainPanel mPage;
 
 	public void onModuleLoad() {
 		LOG.info("onModuleLoad()");
@@ -65,13 +67,17 @@ public class Index implements EntryPoint {
 		});
 	}
 	
+	public AccountServiceAsync getService() {
+		return mService;
+	}
+	
 	private void initialize() {
 		LOG.info("initialize()");
 
 		// set initial history state
 		String initToken = History.getToken();
 		if(initToken.length() == 0) {
-			History.newItem(HISTORY_LOGIN);
+			History.newItem(SCREEN_LOGIN);
 		}
 
 		// handle history changes
@@ -82,11 +88,15 @@ public class Index implements EntryPoint {
 		});
 		
 		// create and attach views
-		mPage = new IndexPage();
+		mPage = new MainPanel(this);
 		RootPanel.get("app").add(mPage);
 
 		// trigger initial history event
 		History.fireCurrentHistoryState();
+	}
+	
+	public void switchTo(String token) {
+		History.newItem(token, true);
 	}
 	
 	private void historyChange(String token) {

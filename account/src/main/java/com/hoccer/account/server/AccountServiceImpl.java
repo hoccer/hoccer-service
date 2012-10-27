@@ -1,5 +1,7 @@
 package com.hoccer.account.server;
 
+import java.util.UUID;
+
 import javax.servlet.http.HttpSession;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
@@ -11,6 +13,10 @@ public class AccountServiceImpl extends RemoteServiceServlet implements
 
 	private HttpSession getSession(boolean create) {
 		return getThreadLocalRequest().getSession(create);
+	}
+	
+	public String loginDeviceToken() {
+		return UUID.randomUUID().toString();
 	}
 	
 	public void loginPlain(String username, String password) {

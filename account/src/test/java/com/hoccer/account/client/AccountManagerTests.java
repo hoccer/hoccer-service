@@ -16,13 +16,13 @@ import com.google.gwt.user.client.rpc.ServiceDefTarget;
  * See http://mojo.codehaus.org/gwt-maven-plugin/user-guide/testing.html 
  * for details.
  */
-public class GwtTestIndex extends GWTTestCase {
+public class AccountManagerTests extends GWTTestCase {
 
   /**
    * Must refer to a valid module that sources this class.
    */
   public String getModuleName() {
-    return "com.hoccer.account.IndexJUnit";
+    return "com.hoccer.account.AccountManagerTests";
   }
 
   /**

@@ -5,13 +5,21 @@
 <web-app>
   
   <servlet>
-    <servlet-name>accountService</servlet-name>
+    <servlet-name>AccountService</servlet-name>
     <servlet-class>com.hoccer.account.server.AccountServiceImpl</servlet-class>
+  </servlet>
+  <servlet>
+      <servlet-name>QRCodeGenerator</servlet-name>
+      <servlet-class>com.hoccer.account.server.QRCodeGenerator</servlet-class>
   </servlet>
   
   <servlet-mapping>
-    <servlet-name>accountService</servlet-name>
+    <servlet-name>AccountService</servlet-name>
     <url-pattern>/account</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+      <servlet-name>QRCodeGenerator</servlet-name>
+      <url-pattern>/qrcode/*</url-pattern>
   </servlet-mapping>
 
   <welcome-file-list>
