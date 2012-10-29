@@ -1,10 +1,40 @@
-h1 {
-  font-size: 2em;
+.header {
+  background-color: #444444;
+  padding: 1em;
+}
+.headerTitle {
+  display: inline;
+  font-size: 3em;
   font-weight: bold;
-  color: #777777;
-  margin: 40px 0px 70px;
+  vertical-align: text-bottom;
+  color: #aaaaaa;
+}
+.headerLogo {
+  display: inline;
+  vertical-align: text-bottom;
+  margin-right: 2em;
+  height: 4em;
+}
+.navigation {
+  float: left;
+  margin: 1em;
+  width: 8em;
+  border-right: solid;
+  border-width: 1px;
+}
+.content {
+  margin: 1em;
+  margin-left: 11em;
+}
+.loginMethod {
+  display: inline-block;
+  vertical-align: top;
+  border: solid;
+  border-width: 1px;
+  border-color: #333333;
+  padding: 0.5em;
+  margin: 0.5em;
   text-align: center;
 }
-a {
-  font-size: 1.5em;
+.loginMethodTitle {
 }

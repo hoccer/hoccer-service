@@ -17,6 +17,7 @@ public class QRCodeGenerator extends HttpServlet {
 			throws ServletException, IOException {
 
 		resp.setContentType("image/png");
+		
 		QRCode.from(req.getPathInfo())
 			.to(ImageType.PNG)
 			.writeTo(resp.getOutputStream());

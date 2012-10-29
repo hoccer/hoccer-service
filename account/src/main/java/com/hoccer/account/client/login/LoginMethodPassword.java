@@ -6,10 +6,11 @@ import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.hoccer.account.client.AccountManager;
 
@@ -20,13 +21,14 @@ public class LoginMethodPassword extends LoginMethodBase {
 	PasswordTextBox mPasswordText;
 	
 	Button mSignInButton;
+	Hyperlink mRegisterLink;
 	
 	public LoginMethodPassword(AccountManager pApp) {
 		super(pApp);
 	}
 	
 	public Widget initialize() {
-		VerticalPanel v = new VerticalPanel();
+		FlowPanel p = new FlowPanel();
 		
 		ClickHandler clickSubmit = new ClickHandler() {
 			public void onClick(ClickEvent event) {
@@ -41,23 +43,35 @@ public class LoginMethodPassword extends LoginMethodBase {
 			}
 		};
 		
-		v.add(new Label("Username"));
+		p.add(new Label("Username"));
 		
 		mUsernameText = new TextBox();
 		mUsernameText.addKeyDownHandler(keyDownSubmit);
-		v.add(mUsernameText);
+		p.add(mUsernameText);
 		
-		v.add(new Label("Password"));
+		p.add(new Label("Password"));
 		
 		mPasswordText = new PasswordTextBox();
 		mPasswordText.addKeyDownHandler(keyDownSubmit);
-		v.add(mPasswordText);
+		p.add(mPasswordText);
+		
+		FlowPanel finishLine = new FlowPanel();
 		
 		mSignInButton = new Button("Sign in");
 		mSignInButton.addClickHandler(clickSubmit);
-		v.add(mSignInButton);
+		finishLine.add(mSignInButton);
 		
-		return v;
+		mRegisterLink = new Hyperlink("Register", AccountManager.SCREEN_REGISTRATION);
+		finishLine.add(mRegisterLink);
+		
+		p.add(finishLine);
+		
+		return p;
+	}
+
+	@Override
+	public String getTitle() {
+		return "Web Account";
 	}
 	
 }

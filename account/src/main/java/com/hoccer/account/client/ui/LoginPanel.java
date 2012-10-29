@@ -1,12 +1,12 @@
 package com.hoccer.account.client.ui;
 
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.hoccer.account.client.AccountManager;
+import com.hoccer.account.client.login.LoginMethodDeviceNearby;
 import com.hoccer.account.client.login.LoginMethodDeviceToken;
 import com.hoccer.account.client.login.LoginMethodPassword;
-import com.hoccer.account.client.login.LoginMethodRegister;
 
 public class LoginPanel extends Composite {
 
@@ -18,13 +18,13 @@ public class LoginPanel extends Composite {
 	}
 
 	private Panel initialize() {
-		HorizontalPanel h = new HorizontalPanel();
+		FlowPanel p = new FlowPanel();
 		
-		h.add(new LoginMethodPassword(mApp));
-		h.add(new LoginMethodRegister(mApp));
-		h.add(new LoginMethodDeviceToken(mApp));
+		p.add(new LoginMethodPassword(mApp));
+		p.add(new LoginMethodDeviceToken(mApp));
+		p.add(new LoginMethodDeviceNearby(mApp));
 		
-		return h;
+		return p;
 	}
 	
 }

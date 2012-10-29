@@ -17,7 +17,7 @@
 
   <packaging>war</packaging>
 
-  <name>Hoccer Account Service</name>
+  <name>Hoccer Account Manager</name>
 
   <properties>
     <gwtVersion>2.4.0</gwtVersion>

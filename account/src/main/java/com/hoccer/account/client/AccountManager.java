@@ -10,14 +10,18 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.DeckPanel;
-import com.google.gwt.user.client.ui.DockPanel;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.DockLayoutPanel;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
+import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.hoccer.account.client.ui.MainPanel;
+import com.hoccer.account.client.ui.DevicesPanel;
+import com.hoccer.account.client.ui.LoginPanel;
+import com.hoccer.account.client.ui.RegistrationPanel;
+import com.hoccer.account.client.ui.WelcomePanel;
 
 /**
  */
@@ -44,8 +48,14 @@ public class AccountManager implements EntryPoint {
 	private final Messages mMessages
 		= GWT.create(Messages.class);
 	
-	private MainPanel mPage;
+	private DockLayoutPanel mDock;
 
+	private Panel mHeader;
+
+	private Panel mNavigation;
+
+	private DeckPanel mContent;
+	
 	public void onModuleLoad() {
 		LOG.info("onModuleLoad()");
 		
@@ -86,13 +96,43 @@ public class AccountManager implements EntryPoint {
 				historyChange(event.getValue());
 			}
 		});
-		
-		// create and attach views
-		mPage = new MainPanel(this);
-		RootPanel.get("app").add(mPage);
 
+		// create and attach views
+		initializeUi();
+		
 		// trigger initial history event
 		History.fireCurrentHistoryState();
+	}
+	
+	private void initializeUi() {
+		FlowPanel f = new FlowPanel();
+		
+		mHeader = new FlowPanel();
+		mHeader.setStylePrimaryName("header");
+		Image headerLogo = new Image(GWT.getModuleBaseURL() + "../logo.png");
+		headerLogo.setStylePrimaryName("headerLogo");
+		mHeader.add(headerLogo);
+		Label headerTitle = new Label("Account Management");
+		headerTitle.setStylePrimaryName("headerTitle");
+		mHeader.add(headerTitle);
+		f.add(mHeader);
+		
+		mNavigation = new VerticalPanel();
+		mNavigation.setStylePrimaryName("navigation");
+		mNavigation.add(new Hyperlink("Welcome", AccountManager.SCREEN_WELCOME));
+		mNavigation.add(new Hyperlink("Devices", AccountManager.SCREEN_DEVICES));
+		f.add(mNavigation);
+
+		mContent = new DeckPanel();
+		mContent.setStylePrimaryName("content");
+		mContent.add(new LoginPanel(this));
+		mContent.add(new WelcomePanel());
+		mContent.add(new DevicesPanel());
+		mContent.add(new RegistrationPanel());
+		mContent.showWidget(0);
+		f.add(mContent);
+		
+		RootPanel.get("app").add(f);
 	}
 	
 	public void switchTo(String token) {
@@ -101,7 +141,15 @@ public class AccountManager implements EntryPoint {
 	
 	private void historyChange(String token) {
 		LOG.info("historyChange(" + token + ")");
-		mPage.onHistoryChange(token);
+		if(token.equals(AccountManager.SCREEN_LOGIN)) {
+			mContent.showWidget(0);
+		} else if(token.equals(AccountManager.SCREEN_WELCOME)) {
+			mContent.showWidget(1);
+		} else if(token.equals(AccountManager.SCREEN_REGISTRATION)) {
+			mContent.showWidget(3);
+		} else if(token.equals(AccountManager.SCREEN_DEVICES)) {
+			mContent.showWidget(2);
+		}
 	}
 
 }

@@ -1,8 +1,8 @@
 package com.hoccer.account.client.ui;
 
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class RegistrationPanel extends Composite {
@@ -12,11 +12,11 @@ public class RegistrationPanel extends Composite {
 	}
 	
 	private Widget initialize() {
-		VerticalPanel v = new VerticalPanel();
+		FlowPanel p = new FlowPanel();
 		
-		v.add(new Label("Registration"));
+		p.add(new Label("Registration"));
 		
-		return v;
+		return p;
 	}
 	
 }
