@@ -74,6 +74,10 @@ public class CacheFile {
 	public int getState() {
 		return mState;
 	}
+	
+	public boolean isAbandoned() {
+		return mState == STATE_ABANDONED;
+	}
 
 	public String getStateString() {
 		return stateNames[mState];

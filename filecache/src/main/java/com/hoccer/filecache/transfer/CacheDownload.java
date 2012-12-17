@@ -51,6 +51,10 @@ public class CacheDownload extends CacheTransfer {
 			int bytesSent = 0;
 			int bytesLimit = 0;
 			do {
+				if(cacheFile.isAbandoned()) {
+					break;
+				}
+				
 				bytesLimit = cacheFile.getLimit();
 				
 				if(bytesSent >= bytesLimit) {
