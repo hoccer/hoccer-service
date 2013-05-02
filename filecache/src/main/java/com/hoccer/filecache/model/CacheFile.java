@@ -17,6 +17,7 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Logger;
 
+import com.hoccer.filecache.CacheBackend;
 import com.hoccer.filecache.transfer.CacheDownload;
 import com.hoccer.filecache.transfer.CacheUpload;
 
@@ -42,9 +43,11 @@ public class CacheFile {
 			
 	protected static Logger log
 		= Logger.getLogger(CacheFile.class.getSimpleName());
-	
+
+    private CacheBackend mBackend;
 	private ReentrantLock mStateLock;
 	private Condition mStateChanged;
+
 	private int mState;
 	private int mLimit;
 	
@@ -59,7 +62,7 @@ public class CacheFile {
 	private Vector<CacheDownload> mDownloads
 		= new Vector<CacheDownload>();
 	
-	private CacheFile(String pUUID) {
+	public CacheFile(String pUUID) {
 		mStateLock = new ReentrantLock();
 		mStateChanged = mStateLock.newCondition();
 		
@@ -124,7 +127,7 @@ public class CacheFile {
 	}
 	
 	private File getFile() {
-		return new File(sDataDirectory, mUUID);
+		return new File(mBackend.getDataDirectory(), mUUID);
 	}
 	
 	private void switchState(int newState, String cause) {
@@ -136,12 +139,12 @@ public class CacheFile {
 	private void considerRemoval() {
 		if(mState == STATE_EXPIRED) {
 			if(mDownloads.size() == 0) {
-				CacheFile.remove(this);
+				mBackend.remove(this);
 			}
 		}
 		if(mState == STATE_ABANDONED) {
 			if(mDownloads.size() == 0) {
-				CacheFile.remove(this);
+				mBackend.remove(this);
 			}
 		}
 	}
@@ -339,48 +342,6 @@ public class CacheFile {
 		}
 		
 		return r;
-	}
-
-	private static File sDataDirectory = null;
-	
-	private static HashMap<String, CacheFile> sFiles
-			= new HashMap<String, CacheFile>();
-	
-	public static void setDataDirectory(File directory) {
-		sDataDirectory = directory;
-	}
-	
-	public static CacheFile forPathInfo(String pathInfo, boolean create) {
-		if(pathInfo.length() == 1) {
-			return null;
-		}
-		
-		CacheFile res = null;
-		
-		synchronized (sFiles) {
-			String rest = pathInfo.substring(1);
-			
-			if(sFiles.containsKey(rest)) {
-				res = sFiles.get(rest);
-			} else {
-				if(create) {
-					res = new CacheFile(rest);
-					sFiles.put(rest, res);
-				}
-			}
-		}
-		
-		return res;
-	}
-	
-	public static void remove(CacheFile f) {
-		if(sFiles.containsKey(f.getUUID())) {
-			sFiles.remove(f.getUUID());
-		}
-	}
-	
-	public static Vector<CacheFile> getAll() {
-		return new Vector<CacheFile>(sFiles.values());
 	}
 	
 }

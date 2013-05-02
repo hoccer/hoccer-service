@@ -35,8 +35,9 @@ public class ContextListener implements ServletContextListener {
 			dataDirectory = new File(tmpDir, "data");
 			dataDirectory.mkdir();
 		}
-		
-		CacheFile.setDataDirectory(dataDirectory);
+
+        CacheBackend backend = new CacheBackend(dataDirectory);
+        ctx.setAttribute("backend", backend);
 	}
 
 	@Override

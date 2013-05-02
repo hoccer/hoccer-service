@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Vector;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -20,10 +21,18 @@ import com.hoccer.filecache.transfer.CacheUpload;
 @WebServlet(urlPatterns={"/status"})
 public class StatusServlet extends HttpServlet {
 
+    CacheBackend getBackendFromRequest(HttpServletRequest req) {
+        ServletContext ctx = req.getServletContext();
+        CacheBackend backend = (CacheBackend)ctx.getAttribute("backend");
+        return backend;
+    }
+
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		
+
+        CacheBackend backend = getBackendFromRequest(req);
+
 		resp.setContentType("text/plain; charset=UTF-8");
 		
 		OutputStream s = resp.getOutputStream();
@@ -31,7 +40,7 @@ public class StatusServlet extends HttpServlet {
 		
 		w.write(">>>>>>>>>>>>>>> Hoccer Filecache <<<<<<<<<<<<<<<\n\n");
 		
-		Vector<CacheFile> allFiles = CacheFile.getAll();
+		Vector<CacheFile> allFiles = backend.getAll();
 		
 		Collections.sort(allFiles, getSorting());
 		
