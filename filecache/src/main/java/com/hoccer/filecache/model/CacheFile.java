@@ -48,10 +48,11 @@ public class CacheFile {
 	private ReentrantLock mStateLock;
 	private Condition mStateChanged;
 
-	private int mState;
+    private String mUUID;
+
+    private int mState;
 	private int mLimit;
 	
-	private String mUUID;
 	private String mContentType;
 	private int mContentLength;
 	
@@ -62,7 +63,8 @@ public class CacheFile {
 	private Vector<CacheDownload> mDownloads
 		= new Vector<CacheDownload>();
 	
-	public CacheFile(String pUUID) {
+	public CacheFile(CacheBackend pBackend, String pUUID) {
+        mBackend = pBackend;
 		mStateLock = new ReentrantLock();
 		mStateChanged = mStateLock.newCondition();
 		

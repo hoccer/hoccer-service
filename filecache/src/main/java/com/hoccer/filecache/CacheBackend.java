@@ -31,7 +31,7 @@ public class CacheBackend {
                 res = mFiles.get(rest);
             } else {
                 if(create) {
-                    res = new CacheFile(rest);
+                    res = new CacheFile(this, rest);
                     mFiles.put(rest, res);
                 }
             }
