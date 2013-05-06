@@ -21,7 +21,10 @@ import java.util.logging.Logger;
 import com.hoccer.filecache.CacheBackend;
 import com.hoccer.filecache.transfer.CacheDownload;
 import com.hoccer.filecache.transfer.CacheUpload;
+import com.j256.ormlite.field.DatabaseField;
+import com.j256.ormlite.table.DatabaseTable;
 
+@DatabaseTable(tableName = "file")
 public class CacheFile {
 
 	public static final int STATE_NEW = 1;
@@ -45,26 +48,32 @@ public class CacheFile {
 	protected static Logger log
 		= Logger.getLogger(CacheFile.class.getSimpleName());
 
-    private CacheBackend mBackend;
-	private ReentrantLock mStateLock;
-	private Condition mStateChanged;
+    transient private CacheBackend mBackend;
+
+	transient private ReentrantLock mStateLock;
+	transient private Condition mStateChanged;
+
+    transient private CacheUpload mUpload = null;
+
+    transient private Vector<CacheDownload> mDownloads = new Vector<CacheDownload>();
 
     transient private ScheduledFuture<?> mExpiryFuture;
+
+    @DatabaseField(columnName = "uuid")
     private String mUUID;
 
+    @DatabaseField(columnName = "state")
     private int mState;
+    @DatabaseField(columnName = "limit")
 	private int mLimit;
-	
+
+    @DatabaseField(columnName = "contentType")
 	private String mContentType;
+    @DatabaseField(columnName = "contentLength")
 	private int mContentLength;
-	
+
+    @DatabaseField(columnName = "expiryTime")
 	private Date mExpiryTime;
-	
-	private CacheUpload mUpload = null;
-	
-	private Vector<CacheDownload> mDownloads
-		= new Vector<CacheDownload>();
-	
 
     public CacheFile() {
         mStateLock = new ReentrantLock();
