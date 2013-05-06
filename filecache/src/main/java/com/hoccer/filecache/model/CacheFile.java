@@ -154,6 +154,7 @@ public class CacheFile {
 		log.info("file " + mUUID + " state " + stateNames[mState]
 					+ " -> " + stateNames[newState] + ": " + cause);
 		mState = newState;
+        mBackend.checkpoint(this);
 	}
 	
 	private void considerRemoval() {
@@ -284,6 +285,8 @@ public class CacheFile {
 			mLimit = newLimit;
 			
 			mStateChanged.signalAll();
+
+            mBackend.checkpoint(this);
 		} finally {
 			mStateLock.unlock();
 		}

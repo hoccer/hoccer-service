@@ -23,6 +23,8 @@ public abstract class CacheBackend {
 
     public abstract CacheFile forPathInfo(String pathInfo, boolean create);
 
+    public abstract void checkpoint(CacheFile file);
+
     public abstract void remove(CacheFile file);
 
 }

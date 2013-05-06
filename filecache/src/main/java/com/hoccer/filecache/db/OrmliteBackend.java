@@ -88,6 +88,15 @@ public class OrmliteBackend extends CacheBackend {
     }
 
     @Override
+    public void checkpoint(CacheFile file) {
+        try {
+            mDao.update(file);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
     public synchronized void remove(CacheFile file) {
         try {
             mDao.delete(file);

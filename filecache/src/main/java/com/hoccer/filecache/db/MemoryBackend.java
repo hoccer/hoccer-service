@@ -16,6 +16,7 @@ public class MemoryBackend extends CacheBackend {
         super(dataDir);
     }
 
+    @Override
     public CacheFile forPathInfo(String pathInfo, boolean create) {
         if(pathInfo.length() == 1) {
             return null;
@@ -40,12 +41,18 @@ public class MemoryBackend extends CacheBackend {
         return res;
     }
 
+    @Override
+    public void checkpoint(CacheFile file) {
+    }
+
+    @Override
     public void remove(CacheFile f) {
         if(mFiles.containsKey(f.getUUID())) {
             mFiles.remove(f.getUUID());
         }
     }
 
+    @Override
     public Vector<CacheFile> getAll() {
         return new Vector<CacheFile>(mFiles.values());
     }
