@@ -59,7 +59,7 @@ public class CacheFile {
 
     transient private ScheduledFuture<?> mExpiryFuture;
 
-    @DatabaseField(columnName = "uuid")
+    @DatabaseField(columnName = "uuid", id = true)
     private String mUUID;
 
     @DatabaseField(columnName = "state")
