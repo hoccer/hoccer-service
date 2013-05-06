@@ -69,18 +69,16 @@ public class CacheFile {
     public CacheFile() {
         mStateLock = new ReentrantLock();
         mStateChanged = mStateLock.newCondition();
+
+        mState = STATE_NEW;
+        mLimit = 0;
+
+        mContentLength = -1;
     }
 
 	public CacheFile(String pUUID) {
-		mStateLock = new ReentrantLock();
-		mStateChanged = mStateLock.newCondition();
-		
-		mState = STATE_NEW;
-		mLimit = 0;
-		
+		this();
 		mUUID = pUUID;
-
-		mContentLength = -1;
 	}
 
     public void setBackend(CacheBackend backend) {
