@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.Vector;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
@@ -48,6 +49,7 @@ public class CacheFile {
 	private ReentrantLock mStateLock;
 	private Condition mStateChanged;
 
+    transient private ScheduledFuture<?> mExpiryFuture;
     private String mUUID;
 
     private int mState;
@@ -175,12 +177,13 @@ public class CacheFile {
 			@Override
 			public void run() {
 				CacheFile.this.expire();
+                mExpiryFuture = null;
 			}
 		};
-		expiryExecutor.schedule(
-				expiryAction,
-				mExpiryTime.getTime() - System.currentTimeMillis(),
-				TimeUnit.MILLISECONDS);
+		mExpiryFuture = expiryExecutor.schedule(
+				            expiryAction,
+				            mExpiryTime.getTime() - System.currentTimeMillis(),
+				            TimeUnit.MILLISECONDS);
 	}
 	
 	private void expire() {
