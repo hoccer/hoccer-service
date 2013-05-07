@@ -26,30 +26,54 @@ public class CacheServlet extends HttpServlet {
         CacheBackend backend = (CacheBackend)ctx.getAttribute("backend");
         return backend;
     }
-	
-	@Override
+
+    CacheFile getFileForRequest(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        CacheBackend backend = getBackendFromRequest(req);
+
+        CacheFile file = backend.forPathInfo(req.getPathInfo(), false);
+        if(file == null) {
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND,
+                    "File does not exist");
+            return null;
+        }
+
+        int fileState = file.getState();
+        if(fileState == CacheFile.STATE_EXPIRED
+                || fileState == CacheFile.STATE_ABANDONED
+                || fileState == CacheFile.STATE_NEW) {
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND,
+                    "File does not exist");
+            return null;
+        }
+
+        return file;
+    }
+
+    @Override
+    protected void doHead(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        log.info("status request: " + req.getPathInfo());
+
+        // get the relevant file
+        CacheFile file = getFileForRequest(req, resp);
+        // fill out headers based on file metadata
+        if(file != null) {
+            resp.setContentType(file.getContentType());
+            resp.setContentLength(file.getContentLength());
+        }
+    }
+
+    @Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 		log.info("download starts: " + req.getPathInfo());
 
-        CacheBackend backend = getBackendFromRequest(req);
-		
-		CacheFile file = backend.forPathInfo(req.getPathInfo(), false);
-		if(file == null) {
-			resp.sendError(HttpServletResponse.SC_NOT_FOUND,
-					"File does not exist");
-			return;
-		}
-		
-		int fileState = file.getState();
-		if(fileState == CacheFile.STATE_EXPIRED
-			|| fileState == CacheFile.STATE_ABANDONED
-			|| fileState == CacheFile.STATE_NEW) {
-			resp.sendError(HttpServletResponse.SC_NOT_FOUND,
-					"File does not exist");
-			return;
-		}
-		
+        // get the relevant file
+        CacheFile file = getFileForRequest(req, resp);
+        // abort if we don't have one
+        if(file == null) {
+            return;
+        }
+
 		CacheDownload download = new CacheDownload(file, req, resp);
 		
 		download.perform();
