@@ -40,17 +40,11 @@ public class OrmliteBackend extends CacheBackend {
     }
 
     @Override
-    public synchronized CacheFile forPathInfo(String pathInfo, final boolean create) {
-        if(pathInfo.length() == 1) {
-            return null;
-        }
-
+    public synchronized CacheFile forId(final String id, final boolean create) {
         CacheFile res = null;
 
-        final String rest = pathInfo.substring(1);
-
         // try to find the file in memory
-        res = mAllFiles.get(rest);
+        res = mAllFiles.get(id);
 
         // not found? try database
         if(res == null) {
@@ -61,11 +55,11 @@ public class OrmliteBackend extends CacheBackend {
                             public CacheFile call() throws Exception {
                                 CacheFile res = null;
                                 // try to find in db
-                                res = mDao.queryForId(rest);
+                                res = mDao.queryForId(id);
                                 // not found? create if we want to
                                 if(res == null) {
                                     if(create) {
-                                        res = new CacheFile(rest);
+                                        res = new CacheFile(id);
                                         res.setBackend(OrmliteBackend.this);
                                         mDao.create(res);
                                     }
@@ -80,7 +74,7 @@ public class OrmliteBackend extends CacheBackend {
 
         // remember state object
         if(res != null) {
-            mAllFiles.put(rest, res);
+            mAllFiles.put(id, res);
         }
 
         // return whatever we got

@@ -17,23 +17,17 @@ public class MemoryBackend extends CacheBackend {
     }
 
     @Override
-    public CacheFile forPathInfo(String pathInfo, boolean create) {
-        if(pathInfo.length() == 1) {
-            return null;
-        }
-
+    public CacheFile forId(String id, boolean create) {
         CacheFile res = null;
 
         synchronized (mFiles) {
-            String rest = pathInfo.substring(1);
-
-            if(mFiles.containsKey(rest)) {
-                res = mFiles.get(rest);
+            if(mFiles.containsKey(id)) {
+                res = mFiles.get(id);
             } else {
                 if(create) {
-                    res = new CacheFile(rest);
+                    res = new CacheFile(id);
                     res.setBackend(this);
-                    mFiles.put(rest, res);
+                    mFiles.put(id, res);
                 }
             }
         }

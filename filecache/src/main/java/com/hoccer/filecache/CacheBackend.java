@@ -19,9 +19,17 @@ public abstract class CacheBackend {
         return mDataDirectory;
     }
 
+    public CacheFile forPathInfo(String pathInfo, boolean create) {
+        if(pathInfo.length() == 1) {
+            return null;
+        }
+
+        return forId(pathInfo.substring(1), create);
+    }
+
     public abstract List<CacheFile> getAll();
 
-    public abstract CacheFile forPathInfo(String pathInfo, boolean create);
+    public abstract CacheFile forId(String id, boolean create);
 
     public abstract void checkpoint(CacheFile file);
 
