@@ -9,6 +9,8 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
 
+import com.hoccer.filecache.db.MemoryBackend;
+import com.hoccer.filecache.db.OrmliteBackend;
 import com.hoccer.filecache.model.CacheFile;
 
 @WebListener
@@ -36,7 +38,7 @@ public class ContextListener implements ServletContextListener {
 			dataDirectory.mkdir();
 		}
 
-        CacheBackend backend = new CacheBackend(dataDirectory);
+        CacheBackend backend = new MemoryBackend(dataDirectory);
         ctx.setAttribute("backend", backend);
 	}
 

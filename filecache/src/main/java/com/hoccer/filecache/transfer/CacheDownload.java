@@ -7,6 +7,7 @@ import java.io.RandomAccessFile;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.google.appengine.api.blobstore.ByteRange;
 import com.hoccer.filecache.model.CacheFile;
 
 /**
@@ -19,12 +20,14 @@ public class CacheDownload extends CacheTransfer {
 	private static final int BUFFER_SIZE = 64 * 1024;
 	
 	OutputStream outStream;
+    ByteRange byteRange;
 	
-	public CacheDownload(CacheFile file,
+	public CacheDownload(CacheFile file, ByteRange range,
 						 HttpServletRequest req,
 						 HttpServletResponse resp)
 	{
 		super(file, req, resp);
+        byteRange = range;
 	}
 	
 	public void perform() throws IOException {
@@ -32,64 +35,56 @@ public class CacheDownload extends CacheTransfer {
 		
 		// set content type
 		httpResponse.setContentType(cacheFile.getContentType());
-		
-		// set content length, if known
-		int cLength = cacheFile.getContentLength();
-		if(cLength != -1) {
-			httpResponse.setContentLength(cLength);
-		}
-		
+
+        // start the download
 		cacheFile.downloadStarts(this);
 		rateStart();
 		
 		try {
+            // open/get streams
 			OutputStream outStream = httpResponse.getOutputStream();
 			RandomAccessFile inFile = cacheFile.openForRandomAccess("r");
-			
-			inFile.seek(0);
-			
-			int bytesSent = 0;
-			int bytesLimit = 0;
-			do {
-				if(cacheFile.isAbandoned()) {
-					break;
-				}
-				
-				bytesLimit = cacheFile.getLimit();
-				
-				if(bytesSent >= bytesLimit) {
-					if(cacheFile.waitForData(bytesLimit)) {
-						continue;
-					} else {
-						break;
-					}
-				}
-				
-				int bytesToTransfer = bytesLimit - bytesSent;
-				do {
-					int currentBunch = Math.min(bytesToTransfer, buffer.length);
-					int bytesRead = inFile.read(buffer, 0, currentBunch);
-					
-					if(bytesRead == -1) {
-						throw new IOException("Synchronization fault");
-					}
-					
-					outStream.write(buffer, 0, bytesRead);
-					
-					bytesSent += bytesRead;
-					bytesToTransfer -= bytesRead;
-					
-					rateProgress(bytesRead);
-				} while(bytesToTransfer > 0);
-			} while(true);
-			
+
+            // determine amount of data to send
+            int totalRequested = ((int)byteRange.getEnd()) - ((int)byteRange.getStart()) + 1;
+
+            // seek forward to the requested range
+			inFile.seek(byteRange.getStart());
+
+            // loop until done
+            int totalTransferred = 0;
+            while(totalTransferred < totalRequested) {
+                // determine how much to transfer
+                int bytesWanted = Math.min(totalRequested - totalTransferred, buffer.length);
+
+                // read data from file
+                int bytesRead = inFile.read(buffer, 0, bytesWanted);
+                if(bytesRead == -1) {
+                    break;
+                }
+
+                // write to http output stream
+                outStream.write(buffer, 0, bytesRead);
+
+                // account for what we did
+                totalTransferred += bytesRead;
+                rateProgress(totalTransferred);
+            }
+
+            // close file stream
 			inFile.close();
 			
 		} catch (IOException e) {
+            // notify the file of the abort
 			cacheFile.downloadAborted(this);
+            // rethrow to finish the http request
 			throw e;
-		}
-		
+		} finally {
+            // always finish the rate estimator
+            rateFinish();
+        }
+
+        // we are done, tell everybody
 		cacheFile.downloadFinished(this);
 	}
 }
