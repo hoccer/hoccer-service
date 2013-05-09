@@ -292,17 +292,10 @@ public class CacheFile {
 		}
 	}
 	
-	public boolean waitForData(int lastLimit) {
-		// back off for a moment to reduce lock contention
-		try {
-			Thread.sleep(100);
-		} catch (InterruptedException e) {
-			// we don't care
-		}
-		
+	public boolean waitForData(int lastLimit) throws InterruptedException {
 		// acquire state lock
 		mStateLock.lock();
-		
+
 		try {
 			// cases where progress has been
 			// made already or will never be made
@@ -323,10 +316,7 @@ public class CacheFile {
 			}
 			
 			// wait for state change
-			try {
-				mStateChanged.await();
-			} catch (InterruptedException e) {
-			}
+		    mStateChanged.await();
 
 			// cases where progress may have
 			// been made while waiting

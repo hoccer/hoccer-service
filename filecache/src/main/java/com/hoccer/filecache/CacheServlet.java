@@ -59,9 +59,12 @@ public class CacheServlet extends HttpServlet {
 		CacheDownload download = new CacheDownload(file, range, req, resp);
 
         // perform the download itself
-		download.perform();
-		
-		log.info("download finished: " + req.getPathInfo());
+        try {
+            download.perform();
+        } catch (InterruptedException e) {
+        }
+
+        log.info("download finished: " + req.getPathInfo());
 	}
 
 	@Override
