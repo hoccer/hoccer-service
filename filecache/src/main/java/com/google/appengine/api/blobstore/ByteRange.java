@@ -17,6 +17,7 @@ import java.util.regex.Pattern;
 public class ByteRange {
   private long start;
   private Long end;
+  private Long total;
 
   static final String BYTES_UNIT = "bytes";
   static final String UNIT_REGEX = "([^=\\s]+)";
@@ -40,7 +41,7 @@ public class ByteRange {
    * of the blob.
    */
   public ByteRange(long start) {
-    this(start, null);
+    this(start, null, null);
   }
 
   /**
@@ -51,7 +52,7 @@ public class ByteRange {
    * by end is included in the response.
    */
   public ByteRange(long start, long end) {
-    this(start, Long.valueOf(end));
+    this(start, Long.valueOf(end), null);
 
     if (start < 0) {
       throw new IllegalArgumentException("If end is provided, start must be positive.");
@@ -62,9 +63,22 @@ public class ByteRange {
     }
   }
 
-  protected ByteRange(long start, Long end) {
+  public ByteRange(long start, long end, long total) {
+      this(start, Long.valueOf(end), Long.valueOf(total));
+
+      if(start >= total) {
+          throw new IllegalArgumentException("If total is provided, start must be less than total.");
+      }
+
+      if(end >= total) {
+          throw new IllegalArgumentException("If total is provided, end must be less than total.");
+      }
+  }
+
+  protected ByteRange(long start, Long end, Long total) {
     this.start = start;
     this.end = end;
+    this.total = total;
   }
 
   /**
@@ -74,6 +88,15 @@ public class ByteRange {
    */
   public boolean hasEnd() {
     return end != null;
+  }
+
+  /**
+   * Indicates whether or not this byte range indicates a total.
+   *
+   * @return true if byte range has an end.
+   */
+  public boolean hasTotal() {
+      return total != null;
   }
 
   /**
@@ -100,19 +123,38 @@ public class ByteRange {
   }
 
   /**
+   * Get end index of byte range.
+   *
+   * @return End index of byte range.
+   *
+   * @throws IllegalStateException if byte range does not have an end range.
+   */
+  public long getTotal() {
+      if (!hasTotal()) {
+          throw new IllegalStateException("Byte-range does not have total.  Check hasTotal() before use");
+      }
+      return total;
+  }
+
+  /**
    * Format byte range for use in header.
    */
   @Override
   public String toString() {
+    String result;
     if (end != null) {
-      return BYTES_UNIT + "=" + start + "-" + end;
+      result = BYTES_UNIT + "=" + start + "-" + end;
     } else {
       if (start < 0) {
-        return BYTES_UNIT + "="  + start;
+        result = BYTES_UNIT + "="  + start;
       } else {
-        return BYTES_UNIT + "=" + start + "-";
+        result = BYTES_UNIT + "=" + start + "-";
       }
     }
+    if (total != null) {
+      result += "/" + total;
+    }
+    return result;
   }
 
   /**
@@ -191,7 +233,7 @@ public class ByteRange {
       throw new RangeFormatException("Invalid content-range format: " + contentRange);
     }
 
-    return new ByteRange(Long.parseLong(matcher.group(1)), Long.parseLong(matcher.group(2)));
+    return new ByteRange(Long.parseLong(matcher.group(1)), Long.parseLong(matcher.group(2)), Long.parseLong(matcher.group(3)));
   }
 
   @Override
