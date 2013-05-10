@@ -37,7 +37,6 @@ public class CacheDownload extends CacheTransfer {
 
         // start the download
         transferBegin(Thread.currentThread());
-        rateStart();
 		cacheFile.downloadStarts(this);
 
 		try {
@@ -83,7 +82,7 @@ public class CacheDownload extends CacheTransfer {
                 // account for what we did
                 totalTransferred += bytesRead;
                 absolutePosition += bytesRead;
-                rateProgress(totalTransferred);
+                transferProgress(totalTransferred);
             }
 
             // close file stream
@@ -96,7 +95,6 @@ public class CacheDownload extends CacheTransfer {
 			throw e;
 		} finally {
             // always finish the rate estimator
-            rateFinish();
             transferEnd();
         }
 

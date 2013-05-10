@@ -119,13 +119,19 @@ public abstract class CacheTransfer {
 
     protected synchronized void transferBegin(Thread thread) {
         this.thread = thread;
+        rateStart();
+    }
+
+    protected synchronized void transferProgress(int bytesTransfered) {
+        rateProgress(bytesTransfered);
     }
 
     protected synchronized void transferEnd() {
+        rateFinish();
         this.thread = null;
     }
 	
-	protected void rateStart() {
+	private void rateStart() {
 		long now = System.currentTimeMillis();
 		rateStartTime = now;
 		rateTimestamp = now;
@@ -133,7 +139,7 @@ public abstract class CacheTransfer {
 		totalBytesTransfered = 0;
 	}
 	
-	protected void rateProgress(int bytesTransfered) {
+	private void rateProgress(int bytesTransfered) {
 		long now = System.currentTimeMillis();
 		long passed = now - rateTimestamp;
 		
@@ -151,7 +157,7 @@ public abstract class CacheTransfer {
 		}
 	}
 	
-	protected void rateFinish() {
+	private void rateFinish() {
 		rateEndTime = System.currentTimeMillis();
 		
 		totalDuration = rateEndTime - rateStartTime;

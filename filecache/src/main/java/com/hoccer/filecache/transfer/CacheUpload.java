@@ -56,7 +56,6 @@ public class CacheUpload extends CacheTransfer {
 		cacheFile.setContentLength(cLength);
 
         transferBegin(Thread.currentThread());
-        rateStart();
 		cacheFile.uploadStarts(this);
 		
 		try {
@@ -83,7 +82,7 @@ public class CacheUpload extends CacheTransfer {
 				
 				bytesTotal += bytesRead;
 				
-				rateProgress(bytesRead);
+				transferProgress(bytesRead);
 				
 				cacheFile.updateLimit(bytesTotal);
 			} while(true);
@@ -97,7 +96,6 @@ public class CacheUpload extends CacheTransfer {
             cacheFile.uploadAborted(this);
             throw e;
         } finally {
-            rateFinish();
             transferEnd();
         }
 
