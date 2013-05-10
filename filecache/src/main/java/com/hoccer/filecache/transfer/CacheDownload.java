@@ -36,9 +36,10 @@ public class CacheDownload extends CacheTransfer {
 		httpResponse.setContentType(cacheFile.getContentType());
 
         // start the download
+        transferBegin(Thread.currentThread());
+        rateStart();
 		cacheFile.downloadStarts(this);
-		rateStart();
-		
+
 		try {
             // open/get streams
 			OutputStream outStream = httpResponse.getOutputStream();
@@ -96,9 +97,11 @@ public class CacheDownload extends CacheTransfer {
 		} finally {
             // always finish the rate estimator
             rateFinish();
+            transferEnd();
         }
 
         // we are done, tell everybody
 		cacheFile.downloadFinished(this);
 	}
+
 }

@@ -54,9 +54,10 @@ public class CacheUpload extends CacheTransfer {
 		// determine content length
 		int cLength = httpRequest.getContentLength();
 		cacheFile.setContentLength(cLength);
-		
+
+        transferBegin(Thread.currentThread());
+        rateStart();
 		cacheFile.uploadStarts(this);
-		rateStart();
 		
 		try {
 			InputStream inStream = httpRequest.getInputStream();
@@ -97,8 +98,10 @@ public class CacheUpload extends CacheTransfer {
             throw e;
         } finally {
             rateFinish();
+            transferEnd();
         }
 
 		cacheFile.uploadFinished(this);
 	}
+
 }

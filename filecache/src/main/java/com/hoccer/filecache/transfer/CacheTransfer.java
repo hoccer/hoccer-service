@@ -46,7 +46,12 @@ public abstract class CacheTransfer {
 	 * Http response for this transfer
 	 */
 	protected HttpServletResponse httpResponse;
-	
+
+    /**
+     * Thread running the transfer
+     */
+    protected Thread thread;
+
 	private long rateStartTime;
 	private long rateEndTime;
 	
@@ -105,6 +110,20 @@ public abstract class CacheTransfer {
 	public double getTotalRate() {
 		return totalRate;
 	}
+
+    public synchronized void abort() {
+        if(this.thread != null) {
+            this.thread.interrupt();
+        }
+    }
+
+    protected synchronized void transferBegin(Thread thread) {
+        this.thread = thread;
+    }
+
+    protected synchronized void transferEnd() {
+        this.thread = null;
+    }
 	
 	protected void rateStart() {
 		long now = System.currentTimeMillis();
