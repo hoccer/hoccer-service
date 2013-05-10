@@ -15,9 +15,7 @@ import com.hoccer.filecache.model.CacheFile;
  * @author ingo
  */
 public class CacheUpload extends CacheTransfer {
-	
-	private static final int BUFFER_SIZE = 64 * 1024;
-	
+
 	public static final int MIN_LIFETIME = 10;
 	public static final int MAX_LIFETIME = 3 * 365 * 24 * 3600;
 	
@@ -28,7 +26,8 @@ public class CacheUpload extends CacheTransfer {
 	}
 	
 	public void perform() throws IOException, InterruptedException {
-		byte[] buffer = new byte[BUFFER_SIZE];
+        // allocate a transfer buffer
+		byte[] buffer = BufferCache.takeBuffer();
 		
 		// determine expiry time
 		int expiresIn = MAX_LIFETIME;
@@ -97,6 +96,8 @@ public class CacheUpload extends CacheTransfer {
             throw e;
         } finally {
             transferEnd();
+            // return the transfer buffer
+            BufferCache.returnBuffer(buffer);
         }
 
 		cacheFile.uploadFinished(this);

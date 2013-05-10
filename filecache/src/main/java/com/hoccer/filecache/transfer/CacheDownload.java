@@ -17,8 +17,6 @@ import com.hoccer.filecache.model.CacheFile;
  */
 public class CacheDownload extends CacheTransfer {
 
-	private static final int BUFFER_SIZE = 64 * 1024;
-	
     ByteRange byteRange;
 	
 	public CacheDownload(CacheFile file, ByteRange range,
@@ -30,7 +28,8 @@ public class CacheDownload extends CacheTransfer {
 	}
 	
 	public void perform() throws IOException, InterruptedException {
-		byte[] buffer = new byte[BUFFER_SIZE];
+        // allocate a transfer buffer
+		byte[] buffer = BufferCache.takeBuffer();
 		
 		// set content type
 		httpResponse.setContentType(cacheFile.getContentType());
@@ -96,6 +95,8 @@ public class CacheDownload extends CacheTransfer {
 		} finally {
             // always finish the rate estimator
             transferEnd();
+            // return the transfer buffer
+            BufferCache.returnBuffer(buffer);
         }
 
         // we are done, tell everybody
