@@ -7,6 +7,7 @@ import java.io.RandomAccessFile;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.google.appengine.api.blobstore.ByteRange;
 import com.hoccer.filecache.model.CacheFile;
 
 /**
@@ -16,13 +17,17 @@ import com.hoccer.filecache.model.CacheFile;
  */
 public class CacheUpload extends CacheTransfer {
 
-	public static final int MIN_LIFETIME = 10;
+    ByteRange byteRange;
+
+    public static final int MIN_LIFETIME = 10;
 	public static final int MAX_LIFETIME = 3 * 365 * 24 * 3600;
 	
 	public CacheUpload(CacheFile file,
 					   HttpServletRequest req,
-					   HttpServletResponse resp) {
+					   HttpServletResponse resp,
+                       ByteRange range) {
 		super(file, req, resp);
+        byteRange = range;
 	}
 	
 	public void perform() throws IOException, InterruptedException {
@@ -49,10 +54,6 @@ public class CacheUpload extends CacheTransfer {
 			cType = "application/octet-stream";
 		}
 		cacheFile.setContentType(cType);
-		
-		// determine content length
-		int cLength = httpRequest.getContentLength();
-		cacheFile.setContentLength(cLength);
 
         transferBegin(Thread.currentThread());
 		cacheFile.uploadStarts(this);
@@ -60,18 +61,21 @@ public class CacheUpload extends CacheTransfer {
 		try {
 			InputStream inStream = httpRequest.getInputStream();
 			RandomAccessFile outFile = cacheFile.openForRandomAccess("rw");
+
+			// determine amount of data to send
+            int totalRequested = ((int)byteRange.getEnd()) - ((int)byteRange.getStart());
+
+            outFile.setLength(cacheFile.getContentLength());
+			outFile.seek(byteRange.getStart());
 			
-			outFile.seek(0);
-			outFile.setLength(0);
-			
-			int bytesTotal = 0;
-			int bytesRead;
-			do {
+			int totalTransferred = 0;
+            int absolutePosition = (int)byteRange.getStart();
+			while(totalTransferred < totalRequested) {
                 if(Thread.interrupted()) {
                     throw new InterruptedException();
                 }
 
-				bytesRead = inStream.read(buffer);
+				int bytesRead = inStream.read(buffer);
 				
 				if(bytesRead == -1) {
 					break;
@@ -79,12 +83,13 @@ public class CacheUpload extends CacheTransfer {
 				
 				outFile.write(buffer, 0, bytesRead);
 				
-				bytesTotal += bytesRead;
+				totalTransferred += bytesRead;
+                absolutePosition += bytesRead;
 				
 				transferProgress(bytesRead);
 				
-				cacheFile.updateLimit(bytesTotal);
-			} while(true);
+				cacheFile.updateLimit(absolutePosition);
+			}
 			
 			outFile.close();
 		

@@ -38,7 +38,7 @@ public class UploadServlet extends HttpServlet {
             return;
         }
 
-        CacheUpload upload = new CacheUpload(file, req, resp);
+        CacheUpload upload = new CacheUpload(file, req, resp, range);
 
         try {
             upload.perform();
@@ -81,7 +81,7 @@ public class UploadServlet extends HttpServlet {
         // parse content length
         int contentLength = Integer.parseInt(headContentLength);
 
-        // verify the content length
+        // verify the content length and try to determine file size
         if(file.getContentLength() == -1) {
             if(headContentRange == null) {
                 file.setContentLength(contentLength);
@@ -104,6 +104,17 @@ public class UploadServlet extends HttpServlet {
             range = ByteRange.parseContentRange(headContentRange);
         } catch (RangeFormatException ex) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Bad content range");
+            return null;
+        }
+
+        // try again to determine the file size
+        if(file.getContentLength() == -1) {
+            if(range.hasTotal()) {
+                file.setContentLength((int)range.getTotal());
+            } else {
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Could not determine file size");
+                return null;
+            }
         }
 
         // fill in the end if the client didn't specify
@@ -129,6 +140,7 @@ public class UploadServlet extends HttpServlet {
         long length = range.getEnd() - range.getStart() + 1;
         if(length != contentLength) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Content length does not match range");
+            return null;
         }
 
         return range;
