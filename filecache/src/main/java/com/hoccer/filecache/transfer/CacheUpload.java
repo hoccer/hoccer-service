@@ -27,7 +27,7 @@ public class CacheUpload extends CacheTransfer {
 		super(file, req, resp);
 	}
 	
-	public void perform() throws IOException {
+	public void perform() throws IOException, InterruptedException {
 		byte[] buffer = new byte[BUFFER_SIZE];
 		
 		// determine expiry time
@@ -68,6 +68,10 @@ public class CacheUpload extends CacheTransfer {
 			int bytesTotal = 0;
 			int bytesRead;
 			do {
+                if(Thread.interrupted()) {
+                    throw new InterruptedException();
+                }
+
 				bytesRead = inStream.read(buffer);
 				
 				if(bytesRead == -1) {
@@ -88,8 +92,13 @@ public class CacheUpload extends CacheTransfer {
 		} catch (IOException e) {
 			cacheFile.uploadAborted(this);
 			throw e;
-		}
-		
+		} catch (InterruptedException e) {
+            cacheFile.uploadAborted(this);
+            throw e;
+        } finally {
+            rateFinish();
+        }
+
 		cacheFile.uploadFinished(this);
 	}
 }
