@@ -54,6 +54,10 @@ public class CacheDownload extends CacheTransfer {
             int absolutePosition = (int)byteRange.getStart();
             int absoluteEnd = absolutePosition + totalRequested;
             while(totalTransferred < totalRequested) {
+                if(Thread.interrupted()) {
+                    throw new InterruptedException();
+                }
+
                 // determine current limit
                 int absoluteLimit = Math.min(cacheFile.getLimit(), absoluteEnd);
                 // determine how much to transfer
