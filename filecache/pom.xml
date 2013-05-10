@@ -43,6 +43,12 @@
         <artifactId>postgresql</artifactId>
         <version>9.1-901.jdbc4</version>
     </dependency>
+    <!-- JSON-RPC library -->
+    <dependency>
+      <groupId>better</groupId>
+      <artifactId>better-jsonrpc-websocket</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+    </dependency>
   </dependencies>
   
   <build>
