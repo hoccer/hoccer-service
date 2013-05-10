@@ -30,7 +30,7 @@ public class ControlServlet extends WebSocketServlet {
     public WebSocket doWebSocketConnect(HttpServletRequest request, String protocol) {
         if(protocol.equals("com.hoccer.filecache.control.v1")) {
             JsonRpcWsConnection connection = new JsonRpcWsConnection();
-            ControlConnection handler = new ControlConnection(connection);
+            ControlConnection handler = new ControlConnection(this, connection);
             connection.bindServer(mRpcServer, handler);
             return connection;
         }

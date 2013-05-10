@@ -5,9 +5,12 @@ import com.hoccer.filecache.control.ICacheControl;
 
 public class ControlConnection implements ICacheControl {
 
+    ControlServlet mServlet;
+
     JsonRpcConnection mRpcConnection;
 
-    public ControlConnection(JsonRpcConnection rpcConnection) {
+    public ControlConnection(ControlServlet servlet, JsonRpcConnection rpcConnection) {
+        mServlet = servlet;
         mRpcConnection = rpcConnection;
     }
 
