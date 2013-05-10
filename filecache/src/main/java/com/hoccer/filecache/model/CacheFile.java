@@ -281,8 +281,10 @@ public class CacheFile {
 	
 	public void updateLimit(int newLimit) {
 		mStateLock.lock();
-		try {			
-			mLimit = newLimit;
+		try {
+            if(newLimit > mLimit) {
+			    mLimit = newLimit;
+            }
 			
 			mStateChanged.signalAll();
 
