@@ -6,7 +6,6 @@ import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.jdbc.JdbcConnectionSource;
 import com.j256.ormlite.misc.TransactionManager;
-import com.j256.ormlite.table.TableUtils;
 
 import java.io.File;
 import java.sql.SQLException;
@@ -97,7 +96,7 @@ public class OrmliteBackend extends CacheBackend {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        mAllFiles.remove(file.getUUID());
+        mAllFiles.remove(file.getFileId());
     }
 
 }

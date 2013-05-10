@@ -47,7 +47,7 @@ public class StatusServlet extends HttpServlet {
 		
 		w.write("Active files (" + allFiles.size() + "):\n");
 		for (CacheFile f : allFiles) {			
-			w.write(" File " + f.getUUID()
+			w.write(" File " + f.getFileId()
 					+ " type " + f.getContentType()
 					+ " length " + f.getContentLength()
 					+ "\n");

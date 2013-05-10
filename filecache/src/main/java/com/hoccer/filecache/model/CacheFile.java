@@ -4,12 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.text.DateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.Vector;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -59,8 +54,12 @@ public class CacheFile {
 
     transient private ScheduledFuture<?> mExpiryFuture;
 
-    @DatabaseField(columnName = "uuid", id = true)
-    private String mUUID;
+    @DatabaseField(columnName = "fileId", id = true)
+    private String mFileId;
+    @DatabaseField(columnName = "uploadId", unique = true)
+    private String mUploadId;
+    @DatabaseField(columnName = "downloadId", unique = true)
+    private String mDownloadId;
 
     @DatabaseField(columnName = "state")
     private int mState;
@@ -83,11 +82,15 @@ public class CacheFile {
         mLimit = 0;
 
         mContentLength = -1;
+
+        mFileId = UUID.randomUUID().toString();
+        mUploadId = UUID.randomUUID().toString();
+        mDownloadId = UUID.randomUUID().toString();
     }
 
 	public CacheFile(String pUUID) {
 		this();
-		mUUID = pUUID;
+		mFileId = pUUID;
 	}
 
     public void setBackend(CacheBackend backend) {
@@ -110,11 +113,19 @@ public class CacheFile {
 		return mLimit;
 	}
 	
-	public String getUUID() {
-		return mUUID;
+	public String getFileId() {
+		return mFileId;
 	}
-	
-	public String getContentType() {
+
+    public String getUploadId() {
+        return mUploadId;
+    }
+
+    public String getDownloadId() {
+        return mDownloadId;
+    }
+
+    public String getContentType() {
 		return mContentType;
 	}
 	
@@ -147,11 +158,11 @@ public class CacheFile {
 	}
 	
 	private File getFile() {
-		return new File(mBackend.getDataDirectory(), mUUID);
+		return new File(mBackend.getDataDirectory(), mFileId);
 	}
 	
 	private void switchState(int newState, String cause) {
-		log.info("file " + mUUID + " state " + stateNames[mState]
+		log.info("file " + mFileId + " state " + stateNames[mState]
 					+ " -> " + stateNames[newState] + ": " + cause);
 		mState = newState;
         mBackend.checkpoint(this);
@@ -177,7 +188,7 @@ public class CacheFile {
 		cal.setTime(now);
 		cal.add(Calendar.SECOND, secondsFromNow);
 		mExpiryTime = cal.getTime();
-		log.info("file " + mUUID + " expires " + mExpiryTime.toString());
+		log.info("file " + mFileId + " expires " + mExpiryTime.toString());
 	}
 	
 	private void scheduleExpiry() {

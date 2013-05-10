@@ -41,8 +41,8 @@ public class MemoryBackend extends CacheBackend {
 
     @Override
     public void remove(CacheFile f) {
-        if(mFiles.containsKey(f.getUUID())) {
-            mFiles.remove(f.getUUID());
+        if(mFiles.containsKey(f.getFileId())) {
+            mFiles.remove(f.getFileId());
         }
     }
 
