@@ -19,7 +19,7 @@ public class CacheUpload extends CacheTransfer {
 	private static final int BUFFER_SIZE = 64 * 1024;
 	
 	public static final int MIN_LIFETIME = 10;
-	public static final int MAX_LIFETIME = 3 * 3600;
+	public static final int MAX_LIFETIME = 3 * 365 * 24 * 3600;
 	
 	public CacheUpload(CacheFile file,
 					   HttpServletRequest req,
