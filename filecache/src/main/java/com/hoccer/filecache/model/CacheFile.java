@@ -61,6 +61,9 @@ public class CacheFile {
     @DatabaseField(columnName = "downloadId", unique = true)
     private String mDownloadId;
 
+    @DatabaseField(columnName = "accountId")
+    private String mAccountId;
+
     @DatabaseField(columnName = "state")
     private int mState;
     @DatabaseField(columnName = "limit")
@@ -123,6 +126,10 @@ public class CacheFile {
 
     public String getDownloadId() {
         return mDownloadId;
+    }
+
+    public String getAccountId() {
+        return mAccountId;
     }
 
     public String getContentType() {
