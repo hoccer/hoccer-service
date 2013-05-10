@@ -49,8 +49,6 @@ public class CacheDownload extends CacheTransfer {
             // seek forward to the requested range
 			inFile.seek(byteRange.getStart());
 
-            log.info("total " + totalRequested + " start " + byteRange.getStart());
-
             // loop until done
             int totalTransferred = 0;
             int absolutePosition = (int)byteRange.getStart();
