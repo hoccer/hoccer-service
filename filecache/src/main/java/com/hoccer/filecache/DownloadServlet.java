@@ -1,7 +1,9 @@
 package com.hoccer.filecache;
 
-import java.io.IOException;
-import java.util.logging.Logger;
+import com.google.appengine.api.blobstore.ByteRange;
+import com.google.appengine.api.blobstore.RangeFormatException;
+import com.hoccer.filecache.model.CacheFile;
+import com.hoccer.filecache.transfer.CacheDownload;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -9,17 +11,13 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.logging.Logger;
 
-import com.google.appengine.api.blobstore.ByteRange;
-import com.google.appengine.api.blobstore.RangeFormatException;
-import com.hoccer.filecache.model.CacheFile;
-import com.hoccer.filecache.transfer.CacheDownload;
-import com.hoccer.filecache.transfer.CacheUpload;
+@WebServlet(urlPatterns = "/download/*")
+public class DownloadServlet extends HttpServlet {
 
-@WebServlet(urlPatterns="/v3/*",asyncSupported=true)
-public class CacheServlet extends HttpServlet {
-
-	static Logger log = Logger.getLogger(CacheServlet.class.getSimpleName());
+    static Logger log = Logger.getLogger(DownloadServlet.class.getSimpleName());
 
     @Override
     protected void doHead(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -37,9 +35,9 @@ public class CacheServlet extends HttpServlet {
     }
 
     @Override
-	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
-			throws ServletException, IOException {
-		log.info("download starts: " + req.getPathInfo());
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+        log.info("download starts: " + req.getPathInfo());
 
         // get the relevant file
         CacheFile file = getFileForRequest(req, resp);
@@ -56,7 +54,7 @@ public class CacheServlet extends HttpServlet {
         }
 
         // create a transfer object
-		CacheDownload download = new CacheDownload(file, range, req, resp);
+        CacheDownload download = new CacheDownload(file, range, req, resp);
 
         // perform the download itself
         try {
@@ -65,28 +63,7 @@ public class CacheServlet extends HttpServlet {
         }
 
         log.info("download finished: " + req.getPathInfo());
-	}
-
-	@Override
-	protected void doPut(HttpServletRequest req, HttpServletResponse resp)
-			throws ServletException, IOException {
-		log.info("upload starts: " + req.getPathInfo());
-
-        CacheBackend backend = getCacheBackend();
-
-        CacheFile file = backend.forPathInfo(req.getPathInfo(), true);
-		if(file == null) {
-			resp.sendError(HttpServletResponse.SC_NOT_FOUND,
-					"File can not exist in cache");
-			return;
-		}
-		
-		CacheUpload upload = new CacheUpload(file, req, resp);
-		
-		upload.perform();
-		
-		log.info("upload finished: " + req.getPathInfo());
-	}
+    }
 
     private ByteRange beginGet(CacheFile file, HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String headRange = req.getHeader("Range");
