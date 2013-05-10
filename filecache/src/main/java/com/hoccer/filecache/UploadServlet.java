@@ -1,5 +1,7 @@
 package com.hoccer.filecache;
 
+import com.google.appengine.api.blobstore.ByteRange;
+import com.google.appengine.api.blobstore.RangeFormatException;
 import com.hoccer.filecache.model.CacheFile;
 import com.hoccer.filecache.transfer.CacheUpload;
 
@@ -31,12 +33,20 @@ public class UploadServlet extends HttpServlet {
             return;
         }
 
+        ByteRange range = beginPut(file, req, resp);
+        if(range == null) {
+            return;
+        }
+
         CacheUpload upload = new CacheUpload(file, req, resp);
 
         try {
             upload.perform();
         } catch (InterruptedException e) {
+            return;
         }
+
+        finishPut(file, req, resp);
 
         log.info("upload finished: " + req.getPathInfo());
     }
@@ -55,6 +65,83 @@ public class UploadServlet extends HttpServlet {
         }
 
         backend.remove(file);
+    }
+
+    private ByteRange beginPut(CacheFile file, HttpServletRequest req, HttpServletResponse resp)
+        throws ServletException, IOException {
+        String headContentLength = req.getHeader("Content-Length");
+        String headContentRange = req.getHeader("Content-Range");
+
+        // content length is mandatory
+        if(headContentLength == null) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Content length not specified");
+            return null;
+        }
+
+        // parse content length
+        int contentLength = Integer.parseInt(headContentLength);
+
+        // verify the content length
+        if(file.getContentLength() == -1) {
+            if(headContentRange == null) {
+                file.setContentLength(contentLength);
+            }
+        } else {
+            if(contentLength > file.getContentLength()) {
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Content length to large for file");
+                return null;
+            }
+        }
+
+        // non-ranged requests get a simple OK
+        if(headContentRange == null) {
+            return new ByteRange(0, contentLength);
+        }
+
+        // parse the byte range
+        ByteRange range = null;
+        try {
+            range = ByteRange.parseContentRange(headContentRange);
+        } catch (RangeFormatException ex) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Bad content range");
+        }
+
+        // fill in the end if the client didn't specify
+        if(!range.hasEnd()) {
+            range = new ByteRange(range.getStart(), file.getContentLength() - 1);
+        }
+
+        // verify that it makes sense
+        if(range.getStart() > range.getEnd()) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Bad range: start > end");
+            return null;
+        }
+        if(range.getStart() < 0 || range.getEnd() < 0) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Bad range: start or end < 0");
+            return null;
+        }
+        if(range.getStart() > file.getContentLength() || range.getEnd() > file.getContentLength()) {
+            resp.setStatus(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
+            return null;
+        }
+
+        // determine the length of the chunk
+        long length = range.getEnd() - range.getStart() + 1;
+        if(length != contentLength) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Content length does not match range");
+        }
+
+        return range;
+    }
+
+    private void finishPut(CacheFile file, HttpServletRequest req, HttpServletResponse resp) {
+        resp.setContentLength(0);
+        resp.setHeader("Range", "bytes 0-" + file.getLimit() + "/" + file.getContentLength());
+        if(file.getLimit() == file.getContentLength()) {
+            resp.setStatus(HttpServletResponse.SC_OK);
+        } else {
+            resp.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY); // "resume incomplete"
+        }
     }
 
     private CacheBackend getCacheBackend() {

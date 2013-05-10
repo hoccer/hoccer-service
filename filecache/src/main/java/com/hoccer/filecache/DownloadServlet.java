@@ -31,7 +31,11 @@ public class DownloadServlet extends HttpServlet {
         }
 
         // prepare the response
-        beginGet(file, req, resp);
+        ByteRange range = beginGet(file, req, resp);
+        if(range == null) {
+            return;
+        }
+        finishGet(file, req, resp, range);
     }
 
     @Override
@@ -60,7 +64,10 @@ public class DownloadServlet extends HttpServlet {
         try {
             download.perform();
         } catch (InterruptedException e) {
+            return;
         }
+
+        finishGet(file, req, resp, range);
 
         log.info("download finished: " + req.getPathInfo());
     }
@@ -70,7 +77,6 @@ public class DownloadServlet extends HttpServlet {
 
         // non-ranged requests get a simple OK
         if(headRange == null) {
-            resp.setStatus(HttpServletResponse.SC_OK);
             if(file.getContentLength() != -1) {
                 resp.setContentLength(file.getContentLength());
                 return new ByteRange(0, file.getContentLength());
@@ -87,6 +93,8 @@ public class DownloadServlet extends HttpServlet {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Bad range");
             return null;
         }
+
+        // fill in the end if the client didn't specify
         if(!range.hasEnd()) {
             range = new ByteRange(range.getStart(), file.getContentLength() - 1);
         }
@@ -105,19 +113,25 @@ public class DownloadServlet extends HttpServlet {
             return null;
         }
 
+        // return the range to be transferred
+        return range;
+    }
+
+    private void finishGet(CacheFile file, HttpServletRequest req, HttpServletResponse resp, ByteRange range) {
         // determine the length of the response
         long length = range.getEnd() - range.getStart() + 1;
 
         // fill out response headers
-        resp.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
+        if(range.getStart() == 0 && range.getEnd() == (file.getContentLength() - 1)) {
+            resp.setStatus(HttpServletResponse.SC_OK);
+        } else {
+            resp.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
+        }
         resp.setContentLength((int)length);
         resp.setHeader("Content-Range",
                 "bytes " + range.getStart() +
                         "-" + range.getEnd() +
                         "/" + file.getContentLength());
-
-        // return the range to be transferred
-        return range;
     }
 
     private CacheFile getFileForRequest(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
