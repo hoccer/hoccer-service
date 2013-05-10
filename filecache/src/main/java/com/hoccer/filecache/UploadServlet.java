@@ -41,6 +41,22 @@ public class UploadServlet extends HttpServlet {
         log.info("upload finished: " + req.getPathInfo());
     }
 
+    @Override
+    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        log.info("delete request: " + req.getPathInfo());
+
+        CacheBackend backend = getCacheBackend();
+
+        CacheFile file = backend.forPathInfo(req.getPathInfo(), false);
+        if(file == null) {
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND,
+                    "File does not exist");
+            return;
+        }
+
+        backend.remove(file);
+    }
+
     private CacheBackend getCacheBackend() {
         ServletContext ctx = getServletContext();
         CacheBackend backend = (CacheBackend)ctx.getAttribute("backend");
