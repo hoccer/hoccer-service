@@ -312,7 +312,7 @@ public class CacheFile {
 		}
 	}
 	
-	public boolean waitForData(int lastLimit) throws InterruptedException {
+	public boolean waitForData(int wantedPosition) throws InterruptedException {
 		// acquire state lock
 		mStateLock.lock();
 
@@ -320,14 +320,14 @@ public class CacheFile {
 			// cases where progress has been
 			// made already or will never be made
 			if(mState == STATE_COMPLETE || mState == STATE_EXPIRED) {
-				if(mLimit > lastLimit) {
+				if(mLimit > wantedPosition) {
 					return true;
 				} else {
 					return false;
 				}
 			}	
 			if(mState == STATE_UPLOADING) {
-				if(mLimit > lastLimit) {
+				if(mLimit > wantedPosition) {
 					return true;
 				}
 			}
