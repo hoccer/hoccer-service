@@ -85,6 +85,8 @@ public class UploadServlet extends HttpServlet {
         if(file.getContentLength() == -1) {
             if(headContentRange == null) {
                 file.setContentLength(contentLength);
+            } else {
+                // XXX we should take the length from the third field of headContentRange
             }
         } else {
             if(contentLength > file.getContentLength()) {
