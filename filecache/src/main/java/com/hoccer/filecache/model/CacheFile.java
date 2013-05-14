@@ -229,7 +229,7 @@ public class CacheFile {
 			if(mState == STATE_NEW) {
 				switchState(STATE_UPLOADING, "new upload");
 			} else {
-				// XXX error or reupload
+                // this means we are in a reupload
 			}
 
 			mUpload = upload;
@@ -243,8 +243,6 @@ public class CacheFile {
 	public void uploadAborted(CacheUpload upload) {
 		mStateLock.lock();
 		try {
-			switchState(STATE_ABANDONED, "upload aborted");
-			
 			mUpload = null;
 			
 			mStateChanged.signalAll();
@@ -260,8 +258,6 @@ public class CacheFile {
 		try {
 			if(mState == STATE_UPLOADING) {
 				switchState(STATE_COMPLETE, "upload finished");
-			} else {
-				// XXX error
 			}
 			
 			scheduleExpiry();
